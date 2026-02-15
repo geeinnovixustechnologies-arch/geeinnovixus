@@ -36,11 +36,11 @@
     "lucide-react": "^0.544.0",
     "mongoose": "^8.18.1",
     "motion": "^12.23.16",
-    "next": "15.5.3",
+    "next": "^15.5.7",
     "next-auth": "^4.24.11",
     "nodemailer": "^6.10.1",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
     "react-hook-form": "^7.62.0",
     "react-hot-toast": "^2.6.0",
     "recharts": "^3.2.1",
@@ -55,7 +55,7 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
-    "eslint-config-next": "15.5.3",
+    "eslint-config-next": "^15.5.7",
     "tailwindcss": "^4.1.13"
   }
 }
