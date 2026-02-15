@@ -82,7 +82,33 @@ export default function CertificationDetailPage({ params }) {
             issuedAt: "2025-11-06T00:00:00.000Z",
             provider: "Gee Innovixus Technologies (OPC) Pvt Ltd",
             certificateId: "GI-2025-MR06",
+        },
+        {
+            id: "GEE/EEE/26001",
+            studentName: "Chandhu Anusha",
+            domain: "Design Of Electric Vehicles And Matlab Development",
+            duration: "90+ Hours (Nov 13 2025 - Feb 10 2026)",
+            status: "verified",
+            startDate: "2025-11-13T00:00:00.000Z",
+            endDate: "2026-02-10T00:00:00.000Z",
+            issuedAt: "2026-02-15T00:00:00.000Z",
+            provider: "Gee Innovixus Technologies (OPC) Pvt Ltd",
+            certificateId: "GEE/EEE/26001",
+        },
+        {
+            id: "GEE-EEE-26001",
+            studentName: "Chandhu Anusha",
+            domain: "Design Of Electric Vehicles And Matlab Development",
+            duration: "90+ Hours (Nov 13 2025 - Feb 10 2026)",
+            status: "verified",
+            startDate: "2025-11-13T00:00:00.000Z",
+            endDate: "2026-02-10T00:00:00.000Z",
+            issuedAt: "2026-02-15T00:00:00.000Z",
+            provider: "Gee Innovixus Technologies (OPC) Pvt Ltd",
+            certificateId: "GEE-EEE-26001",
         }
+
+
     ];
 
     const cert = certifications.find((c) => c.id === params?.id);
