@@ -111,7 +111,7 @@ export default function CertificationDetailPage({ params }) {
   "id": "GEE-CSE-26001",
   "studentName": "Gandu Sachin",
   "domain": "Fullstack Web Development",
-  "duration": "90+ Hours (Aug 13 2025 - Feb 10 2026)",
+  "duration": "(Aug 13 2025 - Feb 10 2026)",
   "status": "verified",
   "startDate": "2025-08-13T00:00:00.000Z",
   "endDate": "2026-02-10T00:00:00.000Z",
