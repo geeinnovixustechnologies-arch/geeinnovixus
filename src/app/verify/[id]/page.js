@@ -95,18 +95,18 @@ export default function CertificationDetailPage({ params }) {
             provider: "Gee Innovixus Technologies (OPC) Pvt Ltd",
             certificateId: "GEE/EEE/26001",
         },
-        {
-            id: "GEE-EEE-26001",
-            studentName: "Chandhu Anusha",
-            domain: "Design Of Electric Vehicles And Matlab Development",
-            duration: "90+ Hours (DEC 10 2025 - Feb 10 2026)",
-            status: "verified",
-            startDate: "2025-12-10T00:00:00.000Z",
-            endDate: "2026-02-10T00:00:00.000Z",
-            issuedAt: "2026-02-15T00:00:00.000Z",
-            provider: "Gee Innovixus Technologies (OPC) Pvt Ltd",
-            certificateId: "GEE-EEE-26001",
-        },
+{
+  "id": "GEE-EEE-26001",
+  "studentName": "Chandhu Anusha",
+  "domain": "Design Of Electric Vehicles And Matlab Development",
+  "duration": "90+ Hours (15/12/2025 - 01/04/2026)",
+  "status": "verified",
+  "startDate": "2025-12-15T00:00:00.000Z",
+  "endDate": "2026-04-01T00:00:00.000Z",
+  "issuedAt": "2026-04-06T00:00:00.000Z",
+  "provider": "Gee Innovixus Technologies (OPC) Pvt Ltd",
+  "certificateId": "GEE-EEE-26001"
+}
         {
   "id": "GEE-CSE-26001",
   "studentName": "Gandu Sachin",
