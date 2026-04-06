@@ -106,7 +106,7 @@ export default function CertificationDetailPage({ params }) {
   "issuedAt": "2026-04-06T00:00:00.000Z",
   "provider": "Gee Innovixus Technologies (OPC) Pvt Ltd",
   "certificateId": "GEE-EEE-26001"
-}
+},
         {
   "id": "GEE-CSE-26001",
   "studentName": "Gandu Sachin",
