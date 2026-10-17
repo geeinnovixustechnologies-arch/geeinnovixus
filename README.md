@@ -312,3 +312,23 @@ For support, email support@geeinnovixus.com or create an issue in the repository
 ---
 
 **Gee Innovixus** - Transforming ideas into groundbreaking solutions with cutting-edge technology.
+# Certificate generation setup
+
+Certificate generation requires MongoDB and a deployed Google Apps Script web
+app. The script source is in `apps-script/certificate-generator.gs`.
+
+1. Create a Google Docs certificate template with these exact placeholders:
+   `{{studentName}}`, `{{domain}}`, `{{duration}}`, `{{startDate}}`,
+   `{{endDate}}`, `{{issuedAt}}`, `{{provider}}`, `{{certificateId}}`, and
+   `{{certificateUrl}}` (the public verification page link).
+2. In the Apps Script project, set Script Properties for
+   `CERTIFICATE_TEMPLATE_ID` and `CERTIFICATE_FOLDER_ID`.
+3. Deploy the script as a Web App that executes as the script owner. Copy its
+   deployment URL into `CERTIFICATE_APPS_SCRIPT_URL` in the Next.js server
+   environment.
+4. Redeploy the Apps Script version after code changes. Generated PDFs are
+   created in the configured Drive folder and shared with anyone who has the
+   link; the returned URL is stored with the certificate record in MongoDB.
+
+The public verification endpoint is `GET /api/certificates?id=<certificateId>`.
+The creation endpoint is admin-only: `POST /api/certificates`.

@@ -12,6 +12,7 @@ import {
   Search,
   BookOpen,
   Images,
+  Award,
 } from "lucide-react";
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
@@ -148,6 +149,13 @@ export default function AdminDashboard() {
       icon: Images,
       href: "/admin/gallery",
       color: "bg-pink-500 hover:bg-pink-600",
+    },
+    {
+      title: "Certificate Generation",
+      description: "Create a mock certificate preview",
+      icon: Award,
+      href: "/admin/certificates",
+      color: "bg-amber-500 hover:bg-amber-600",
     },
   ];
 
