@@ -1,6 +1,7 @@
 // Updated CertificationDetailPage with requested modifications
 "use client";
 
+import { use } from "react";
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -10,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle, ArrowLeft, Calendar } from "lucide-react";
 
 export default function CertificationDetailPage({ params }) {
+    const { id } = use(params);
     const certifications = [
         {
             id: "GI-2025-MR01",
@@ -122,7 +124,7 @@ export default function CertificationDetailPage({ params }) {
 
     ];
 
-    const cert = certifications.find((c) => c.id === params?.id);
+    const cert = certifications.find((c) => c.id === id);
 
     const formatDate = (d) =>
         d
@@ -166,7 +168,7 @@ export default function CertificationDetailPage({ params }) {
                             <CardContent>
                                 <p className="text-gray-600">
                                     We couldn&apos;t find a certification with ID{" "}
-                                    <span className="font-semibold text-blue-700">{params?.id}</span>.
+                                    <span className="font-semibold text-blue-700">{id}</span>.
                                 </p>
 
                             </CardContent>

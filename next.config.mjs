@@ -10,8 +10,13 @@ const nextConfig = {
   },
   // Image optimization
   images: {
-    domains: ["localhost", "t3.storage.dev", "lh3.googleusercontent.com"],
     remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "",
+        pathname: "/**",
+      },
       {
         protocol: "https",
         hostname: "t3.storage.dev",

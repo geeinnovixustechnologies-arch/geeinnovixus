@@ -1,50 +1,82 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+Version change: 1.0.0 -> 1.0.1
+Modified principles: III. Complete and Accessible User Journeys (explicit permission UI state)
+Added sections: none
+Removed sections: none
+Follow-up TODOs: Confirm the original ratification date.
+-->
+
+# Gee Innovixus Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Existing Libraries First
+Before implementing a capability or adding a dependency, contributors MUST inspect the
+project's installed libraries, shared components, hooks, and utilities. They MUST use a
+suitable existing option when it meets the requirement. A new dependency is permitted only
+when no existing option can satisfy the requirement; its purpose and the alternatives
+considered MUST be recorded in the implementation plan or pull request.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Consistent UI Across Pages
+All public and administrative pages MUST use the established design tokens, shared UI
+components, interaction patterns, and responsive conventions. Contributors MUST extend
+shared components when a pattern is reused, rather than introduce visually divergent
+one-off implementations. Intentional page-specific differences MUST have a clear product
+reason and preserve the site's overall visual and interaction language.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Complete and Accessible User Journeys
+Changes MUST account for the relevant user roles, devices, permissions, and UI states,
+including loading, empty, success, validation, error, and permission-denied states where
+applicable. Interactive experiences MUST support semantic markup, keyboard operation,
+visible focus, and readable contrast. Requirements and implementation plans MUST identify
+relevant edge cases rather than treating the primary success path as complete.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Secure and Privacy-Conscious Engineering
+Features MUST enforce authorization at trusted server boundaries, validate untrusted input,
+and handle personal or confidential data only as required for the feature. Secrets MUST be
+kept out of source control and client-visible code. File, authentication, and administrative
+flows MUST preserve existing security controls; errors MUST not expose secrets or sensitive
+user data.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Verifiable Quality
+Changes MUST include or update focused automated tests for changed behavior when the project
+has an applicable test setup. Validation MUST cover relevant success, failure, and boundary
+cases. Before completion, contributors MUST run the applicable lint, test, and build checks
+available in the repository, and report checks that could not be run.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Technology and Dependency Constraints
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+The existing Next.js, React, Tailwind CSS, HeroUI, Radix-based UI components, and shared
+utilities form the default technology choices where they fit the requirement. This is a
+preference, not a mandate to use a library that does not meet functional, accessibility,
+security, or maintenance needs. New dependencies MUST be justified against the existing
+stack, reviewed for maintenance and license suitability, and kept to the smallest practical
+set. Shared design tokens and components MUST remain the source of truth for cross-page UI
+consistency.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Development Workflow and Quality Gates
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+Implementation plans MUST state the affected pages and user roles, relevant UI states and
+edge cases, reused or newly introduced libraries, and validation approach. Contributors MUST
+review changes across all affected page types and responsive layouts. Pull requests MUST
+summarize behavior changes, dependency decisions, and validation results. Reviewers MUST
+check compliance with this constitution and request an explicit rationale for any exception.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution governs feature specifications, implementation plans, code changes, and
+reviews. Amendments MUST be proposed with their rationale and impact, reviewed by the
+project's maintainers, and reflected in the constitution before dependent work is approved.
+The version MUST follow semantic versioning: MAJOR for incompatible governance changes,
+MINOR for new or materially expanded principles or sections, and PATCH for clarifications
+that do not change the requirements.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+Every implementation plan and pull request MUST identify applicable principles and explain
+any exception. Reviewers MUST verify that library reuse, cross-page UI consistency, relevant
+user cases, security, and validation requirements are addressed. Exceptions MUST be explicit,
+scoped, and approved by maintainers. When this constitution conflicts with lower-level
+guidance, this constitution takes precedence.
+
+**Version**: 1.0.1 | **Ratified**: TODO(RATIFICATION_DATE: confirm original adoption date) | **Last Amended**: 2026-10-17
+

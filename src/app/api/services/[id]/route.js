@@ -8,10 +8,11 @@ import { authOptions } from "@/lib/auth.js";
 // GET /api/services/[id] - Get single service
 export async function GET(request, { params }) {
   try {
+    const { id } = await params;
     await connectDB();
 
     const service = await Service.findOne({
-      _id: params.id,
+      _id: id,
       isActive: true,
     }).lean();
 
@@ -38,6 +39,7 @@ export async function GET(request, { params }) {
 // PUT /api/services/[id] - Update service (Admin only)
 export async function PUT(request, { params }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
 
     if (!session || session.user.role !== "admin") {
@@ -58,7 +60,7 @@ export async function PUT(request, { params }) {
     delete updateData.createdAt; // Prevent modification of creation date
     delete updateData.updatedAt; // Let mongoose handle this
 
-    const service = await Service.findByIdAndUpdate(params.id, updateData, {
+    const service = await Service.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
     });
@@ -87,6 +89,7 @@ export async function PUT(request, { params }) {
 // DELETE /api/services/[id] - Delete service (Admin only)
 export async function DELETE(request, { params }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
 
     if (!session || session.user.role !== "admin") {
@@ -99,7 +102,7 @@ export async function DELETE(request, { params }) {
     await connectDB();
 
     const service = await Service.findByIdAndUpdate(
-      params.id,
+      id,
       { isActive: false },
       { new: true }
     );

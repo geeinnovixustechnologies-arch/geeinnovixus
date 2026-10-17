@@ -1,7 +1,7 @@
 import { withAuth } from "next-auth/middleware";
 
 export default withAuth(
-  function middleware(req) {
+  function proxy(req) {
     // Add any additional middleware logic here
   },
   {
@@ -20,4 +20,3 @@ export default withAuth(
 export const config = {
   matcher: ["/admin/:path*", "/api/admin/:path*"],
 };
-

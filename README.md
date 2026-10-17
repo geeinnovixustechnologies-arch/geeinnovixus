@@ -2,7 +2,7 @@
 
 
 
-A comprehensive web application for academic project consultancy and research publication services, built with Next.js 14, MongoDB, and modern web technologies.
+A comprehensive web application for academic project consultancy and research publication services, built with Next.js 16.4.2, MongoDB, and modern web technologies.
 
 ## 🚀 Features
 
@@ -37,8 +37,8 @@ A comprehensive web application for academic project consultancy and research pu
 
 ### Frontend
 
-- **Next.js 14** with App Router
-- **React 18** with hooks and context
+- **Next.js 16.4.2** with App Router
+- **React 19** with hooks and context
 - **Tailwind CSS** for styling
 - **Framer Motion** for animations
 - **NextUI** for UI components
@@ -70,7 +70,7 @@ A comprehensive web application for academic project consultancy and research pu
 
 Before you begin, ensure you have the following installed:
 
-- **Node.js** (v18 or higher)
+- **Node.js 24.x** (required by the project and used for Vercel deployments)
 - **npm** or **yarn** or **pnpm**
 - **MongoDB** (local or Atlas)
 - **Git**
