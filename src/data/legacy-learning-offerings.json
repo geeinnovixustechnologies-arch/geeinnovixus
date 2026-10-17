@@ -1,0 +1,489 @@
+[
+  {
+    "title": "Civil Engineering Software Training",
+    "description": "Comprehensive training in civil engineering design and analysis software",
+    "shortDescription": "Comprehensive training in civil engineering design and analysis software",
+    "category": "Civil Engineering",
+    "level": "Beginner to Advanced",
+    "duration": "4-8 weeks",
+    "modules": [
+      "AutoCAD Fundamentals",
+      "STAAD.Pro Analysis",
+      "ETABS Design",
+      "Revit Architecture",
+      "Tekla Structures",
+      "BIM Implementation"
+    ],
+    "software": [
+      "AutoCAD",
+      "STAAD.Pro",
+      "ETABS",
+      "Revit",
+      "Tekla",
+      "BIM"
+    ],
+    "features": [
+      "Hands-on Projects",
+      "Industry Certification",
+      "Job Placement Support"
+    ],
+    "isActive": true
+  },
+  {
+    "title": "Mechanical Engineering Software",
+    "description": "Complete mechanical design and simulation software training",
+    "shortDescription": "Complete mechanical design and simulation software training",
+    "category": "Mechanical Engineering",
+    "level": "Beginner to Advanced",
+    "duration": "6-10 weeks",
+    "modules": [
+      "Solidworks Basics",
+      "NX Advanced Modeling",
+      "CATIA Design",
+      "ANSYS Simulation",
+      "Altair Inspire",
+      "3D Printing & Prototyping"
+    ],
+    "software": [
+      "Solidworks",
+      "NX",
+      "CATIA",
+      "ANSYS",
+      "Altair Inspire",
+      "Fusion 360"
+    ],
+    "features": [
+      "Real Projects",
+      "Industry Mentors",
+      "Portfolio Development"
+    ],
+    "isActive": true
+  },
+  {
+    "title": "Electrical & Electronics Software",
+    "description": "Power systems, electronics, and communication software training",
+    "shortDescription": "Power systems, electronics, and communication software training",
+    "category": "Electrical Engineering",
+    "level": "Intermediate to Advanced",
+    "duration": "4-6 weeks",
+    "modules": [
+      "MATLAB Programming",
+      "Power System Analysis",
+      "VLSI Design Tools",
+      "Embedded Systems",
+      "RF & Microwave Design",
+      "Control Systems"
+    ],
+    "software": [
+      "MATLAB",
+      "Simulink",
+      "Cadence",
+      "Altium",
+      "ADS",
+      "LabVIEW"
+    ],
+    "features": [
+      "Hardware Labs",
+      "Project-based Learning",
+      "Industry Standards"
+    ],
+    "isActive": true
+  },
+  {
+    "title": "Computer Science & Programming",
+    "description": "Software development, AI/ML, and computer systems training",
+    "shortDescription": "Software development, AI/ML, and computer systems training",
+    "category": "Computer Science",
+    "level": "Beginner to Advanced",
+    "duration": "8-12 weeks",
+    "modules": [
+      "Programming Fundamentals",
+      "Data Structures & Algorithms",
+      "Machine Learning",
+      "Web Development",
+      "Database Systems",
+      "Cybersecurity"
+    ],
+    "software": [
+      "Python",
+      "Java",
+      "React",
+      "Node.js",
+      "TensorFlow",
+      "MySQL"
+    ],
+    "features": [
+      "Live Coding Sessions",
+      "Hackathons",
+      "Industry Projects"
+    ],
+    "isActive": true
+  },
+  {
+    "title": "Data Analysis & Statistics",
+    "description": "Statistical analysis and data science software training",
+    "shortDescription": "Statistical analysis and data science software training",
+    "category": "Data Science",
+    "level": "Beginner to Intermediate",
+    "duration": "3-5 weeks",
+    "modules": [
+      "SPSS Fundamentals",
+      "Statistical Analysis",
+      "Data Visualization",
+      "Regression Analysis",
+      "Hypothesis Testing",
+      "Report Generation"
+    ],
+    "software": [
+      "SPSS",
+      "R",
+      "Python",
+      "Excel",
+      "Tableau",
+      "Power BI"
+    ],
+    "features": [
+      "Real Datasets",
+      "Statistical Methods",
+      "Report Writing"
+    ],
+    "isActive": true
+  },
+  {
+    "title": "3D Modeling & Animation",
+    "description": "3D design, modeling, and animation software training",
+    "shortDescription": "3D design, modeling, and animation software training",
+    "category": "Design & Animation",
+    "level": "Beginner to Advanced",
+    "duration": "5-8 weeks",
+    "modules": [
+      "3ds Max Basics",
+      "Advanced Modeling",
+      "Texturing & Materials",
+      "Lighting & Rendering",
+      "Animation Techniques",
+      "Post-Production"
+    ],
+    "software": [
+      "3ds Max",
+      "Maya",
+      "Blender",
+      "V-Ray",
+      "After Effects",
+      "Photoshop"
+    ],
+    "features": [
+      "Creative Projects",
+      "Portfolio Building",
+      "Industry Techniques"
+    ],
+    "isActive": true
+  },
+  {
+    "title": "Project Management Software",
+    "description": "Project planning and management software training",
+    "shortDescription": "Project planning and management software training",
+    "category": "Project Management",
+    "level": "Beginner to Intermediate",
+    "duration": "2-4 weeks",
+    "modules": [
+      "Primavera P6",
+      "MS Project",
+      "Project Planning",
+      "Resource Management",
+      "Risk Analysis",
+      "Reporting & Analytics"
+    ],
+    "software": [
+      "Primavera P6",
+      "MS Project",
+      "Trello",
+      "Asana",
+      "Jira",
+      "Smartsheet"
+    ],
+    "features": [
+      "Real Projects",
+      "PMI Standards",
+      "Certification Prep"
+    ],
+    "isActive": true
+  },
+  {
+    "title": "Highway & Road Design",
+    "description": "Transportation engineering and road design software training",
+    "shortDescription": "Transportation engineering and road design software training",
+    "category": "Transportation",
+    "level": "Intermediate to Advanced",
+    "duration": "3-5 weeks",
+    "modules": [
+      "MX Road Design",
+      "Civil 3D",
+      "Highway Geometry",
+      "Drainage Design",
+      "Pavement Design",
+      "Traffic Analysis"
+    ],
+    "software": [
+      "MX Road",
+      "Civil 3D",
+      "AutoCAD",
+      "HEC-RAS",
+      "VISSIM",
+      "Synchro"
+    ],
+    "features": [
+      "Real Highway Projects",
+      "Industry Standards",
+      "Design Codes"
+    ],
+    "isActive": true
+  },
+  {
+    "title": "Civil Engineering Workshop",
+    "description": "Hands-on workshop covering construction practices, QC & QA, and software training\\n\\nWorkshop details: Workshop/Training; participants 15-25; location On-site / Online.",
+    "shortDescription": "Hands-on workshop covering construction practices, QC & QA, and software training\\n\\nWorkshop details: Workshop/Training; participants 15-25; location On-site / Online.",
+    "category": "Civil Engineering",
+    "level": "All levels",
+    "duration": "3-5 days",
+    "modules": [
+      "Construction & Practice",
+      "Quality Control & Quality Assurance",
+      "Tekla Structures",
+      "Revit Architecture",
+      "STAAD.Pro Analysis",
+      "ETABS Design",
+      "AutoCAD Advanced",
+      "SketchUp 3D Modeling",
+      "SAP2000 Analysis",
+      "Abaqus Simulation",
+      "Primavera P6",
+      "BIM Implementation",
+      "SPSS Statistics",
+      "3ds Max Visualization",
+      "Midas Civil",
+      "MX Road Design"
+    ],
+    "software": [],
+    "features": [
+      "Hands-on Training",
+      "Industry Experts",
+      "Certification",
+      "Project Work"
+    ],
+    "isActive": true
+  },
+  {
+    "title": "Mechanical Engineering Workshop",
+    "description": "Comprehensive mechanical design, simulation, and manufacturing workshop\\n\\nWorkshop details: Workshop/Training; participants 12-20; location On-site / Online.",
+    "shortDescription": "Comprehensive mechanical design, simulation, and manufacturing workshop\\n\\nWorkshop details: Workshop/Training; participants 12-20; location On-site / Online.",
+    "category": "Mechanical Engineering",
+    "level": "All levels",
+    "duration": "4-6 days",
+    "modules": [
+      "Design Fundamentals",
+      "Simulation Techniques",
+      "Thermal Analysis",
+      "3D Printing Technology",
+      "Materials & Metallurgy",
+      "Advanced Manufacturing",
+      "Solidworks Design",
+      "NX Modeling",
+      "Rhinoceros 3D",
+      "CATIA Advanced",
+      "AutoCAD Mechanical",
+      "Fusion 360",
+      "Inventor Professional",
+      "ANSYS Simulation",
+      "Altair Inspire",
+      "Abaqus Analysis",
+      "Comsol Multiphysics"
+    ],
+    "software": [],
+    "features": [
+      "Lab Sessions",
+      "Real Projects",
+      "Industry Visits",
+      "Portfolio Development"
+    ],
+    "isActive": true
+  },
+  {
+    "title": "Electrical & Electronics Workshop",
+    "description": "Power systems, electronics, and communication engineering workshop\\n\\nWorkshop details: Workshop/Training; participants 15-25; location On-site / Online.",
+    "shortDescription": "Power systems, electronics, and communication engineering workshop\\n\\nWorkshop details: Workshop/Training; participants 15-25; location On-site / Online.",
+    "category": "Electrical Engineering",
+    "level": "All levels",
+    "duration": "3-4 days",
+    "modules": [
+      "MATLAB Programming",
+      "Power System Analysis",
+      "Power Electronics",
+      "Microelectronics & VLSI",
+      "Control Systems",
+      "Signal Processing",
+      "Machine Learning",
+      "Communication Systems",
+      "EVs Technology",
+      "Embedded Systems",
+      "VLSI Design",
+      "RF & Microwave",
+      "Nanotechnology"
+    ],
+    "software": [],
+    "features": [
+      "Hardware Labs",
+      "Simulation Projects",
+      "Industry Standards",
+      "Research Methods"
+    ],
+    "isActive": true
+  },
+  {
+    "title": "Computer Science Workshop",
+    "description": "Software development, AI/ML, and computer systems workshop\\n\\nWorkshop details: Workshop/Training; participants 20-30; location On-site / Online.",
+    "shortDescription": "Software development, AI/ML, and computer systems workshop\\n\\nWorkshop details: Workshop/Training; participants 20-30; location On-site / Online.",
+    "category": "Computer Science",
+    "level": "All levels",
+    "duration": "5-7 days",
+    "modules": [
+      "Programming Fundamentals",
+      "Data Structures & Algorithms",
+      "Machine Learning",
+      "Web Development",
+      "Database Systems",
+      "Cybersecurity",
+      "MATLAB Programming",
+      "EVs Technology",
+      "Embedded Systems",
+      "VLSI Design",
+      "Power Systems",
+      "Control Systems",
+      "Signal Processing"
+    ],
+    "software": [],
+    "features": [
+      "Coding Bootcamp",
+      "Hackathons",
+      "Industry Projects",
+      "Job Placement"
+    ],
+    "isActive": true
+  },
+  {
+    "title": "MBA & MCA Support Workshop",
+    "description": "Business analysis, project management, and computer applications workshop\\n\\nWorkshop details: Workshop/Training; participants 25-40; location On-site / Online.",
+    "shortDescription": "Business analysis, project management, and computer applications workshop\\n\\nWorkshop details: Workshop/Training; participants 25-40; location On-site / Online.",
+    "category": "Business & Management",
+    "level": "All levels",
+    "duration": "2-3 days",
+    "modules": [
+      "Business Analysis",
+      "Project Management",
+      "Software Development",
+      "Database Management",
+      "System Analysis",
+      "Case Study Analysis",
+      "Project Guidance",
+      "Technical Support",
+      "Academic Writing",
+      "Research Methodology",
+      "Data Analysis",
+      "Presentation Skills"
+    ],
+    "software": [],
+    "features": [
+      "Case Studies",
+      "Group Projects",
+      "Industry Mentors",
+      "Career Guidance"
+    ],
+    "isActive": true
+  },
+  {
+    "title": "Research Methodology Workshop",
+    "description": "Academic research, publication, and PhD support workshop\\n\\nWorkshop details: Workshop/Training; participants 10-20; location On-site / Online.",
+    "shortDescription": "Academic research, publication, and PhD support workshop\\n\\nWorkshop details: Workshop/Training; participants 10-20; location On-site / Online.",
+    "category": "Research & Development",
+    "level": "All levels",
+    "duration": "2-4 days",
+    "modules": [
+      "Research Methodology",
+      "Literature Review",
+      "Data Collection Methods",
+      "Statistical Analysis",
+      "Academic Writing",
+      "Publication Process",
+      "Patent Filing",
+      "Plagiarism Check",
+      "Manuscript Preparation",
+      "PhD Guidance",
+      "Thesis Writing",
+      "Viva Preparation"
+    ],
+    "software": [],
+    "features": [
+      "One-on-One Mentoring",
+      "Publication Support",
+      "Research Tools",
+      "Academic Network"
+    ],
+    "isActive": true
+  },
+  {
+    "title": "Software Certification Training",
+    "description": "Industry-standard software certification programs\\n\\nWorkshop details: Certification Program; participants 15-25; location On-site / Online.",
+    "shortDescription": "Industry-standard software certification programs\\n\\nWorkshop details: Certification Program; participants 15-25; location On-site / Online.",
+    "category": "Certification",
+    "level": "All levels",
+    "duration": "4-8 weeks",
+    "modules": [
+      "AutoCAD Certified Professional",
+      "Solidworks CSWA/CSWP",
+      "ANSYS Certified",
+      "MATLAB Certification",
+      "Revit Architecture",
+      "STAAD.Pro Professional",
+      "ETABS Expert",
+      "Primavera P6",
+      "BIM Professional",
+      "3ds Max Certified"
+    ],
+    "software": [],
+    "features": [
+      "Official Certification",
+      "Exam Preparation",
+      "Industry Recognition",
+      "Career Boost"
+    ],
+    "isActive": true
+  },
+  {
+    "title": "Industry-Specific Training",
+    "description": "Specialized training for specific industries and applications\\n\\nWorkshop details: Industry Training; participants 10-30; location On-site / Online.",
+    "shortDescription": "Specialized training for specific industries and applications\\n\\nWorkshop details: Industry Training; participants 10-30; location On-site / Online.",
+    "category": "Industry Training",
+    "level": "All levels",
+    "duration": "1-2 weeks",
+    "modules": [
+      "Construction Industry",
+      "Manufacturing Sector",
+      "Power & Energy",
+      "Automotive Industry",
+      "Aerospace Engineering",
+      "Oil & Gas",
+      "Telecommunications",
+      "Healthcare Technology",
+      "Renewable Energy",
+      "Smart Cities"
+    ],
+    "software": [],
+    "features": [
+      "Industry Experts",
+      "Real Case Studies",
+      "Custom Curriculum",
+      "Networking"
+    ],
+    "isActive": true
+  }
+]

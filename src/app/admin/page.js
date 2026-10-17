@@ -8,10 +8,8 @@ import {
   Briefcase,
   FileText,
   MessageSquare,
-  DollarSign,
   TrendingUp,
   Eye,
-  Star,
   Calendar,
   Download,
   Upload,
@@ -19,6 +17,9 @@ import {
   BarChart3,
   PieChart,
   Activity,
+  Search,
+  BookOpen,
+  Images,
 } from "lucide-react";
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
@@ -28,82 +29,46 @@ export default function AdminDashboard() {
   const { data: session, status } = useSession();
   const [stats, setStats] = useState({
     totalProjects: 0,
-    totalAccessRequests: 0,
-    totalRevenue: 0,
     totalClients: 0,
     pendingInquiries: 0,
-    pendingAccessRequests: 0,
-    monthlyRevenue: 0,
-    clientSatisfaction: 0,
   });
 
   const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState("");
 
   useEffect(() => {
-    if (status === "authenticated" && session?.user?.role === "admin") {
-      fetchDashboardData();
-    }
-  }, [session, status]);
-
-  const fetchDashboardData = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("/api/admin/dashboard");
-      const data = await response.json();
-
-      if (response.ok) {
+    if (status !== "authenticated" || session?.user?.role !== "admin") return;
+    let active = true;
+    fetch("/api/admin/dashboard", { cache: "no-store" })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Dashboard data unavailable.");
+        if (!active) return;
         setStats({
           totalProjects: data.stats.totalProjects,
-          totalAccessRequests: data.stats.totalAccessRequests,
-          totalRevenue: data.stats.totalRevenue,
           totalClients: data.stats.totalUsers,
           pendingInquiries: data.stats.pendingInquiries,
-          pendingAccessRequests: data.stats.pendingAccessRequests,
-          monthlyRevenue: data.stats.monthlyRevenue,
-          clientSatisfaction: data.stats.clientSatisfaction,
         });
-
-        // Format recent activity timestamps
-        const formattedActivity = data.recentActivity.map((activity) => ({
-          ...activity,
-          timestamp: new Date(activity.timestamp).toLocaleString(),
-        }));
-
-        setRecentActivity(formattedActivity);
-      } else {
-        console.error("Error fetching dashboard data:", data.message);
-        // Fallback to mock data
-        setStats({
-          totalProjects: 0,
-          totalAccessRequests: 0,
-          totalRevenue: 0,
-          totalClients: 0,
-          pendingInquiries: 0,
-          pendingAccessRequests: 0,
-          monthlyRevenue: 0,
-          clientSatisfaction: 0,
-        });
-        setRecentActivity([]);
-      }
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error);
-      // Fallback to mock data
-      setStats({
-        totalProjects: 0,
-        totalAccessRequests: 0,
-        totalRevenue: 0,
-        totalClients: 0,
-        pendingInquiries: 0,
-        pendingAccessRequests: 0,
-        monthlyRevenue: 0,
-        clientSatisfaction: 0,
+        setRecentActivity(
+          data.recentActivity
+            .map((activity) => ({
+              ...activity,
+              timestamp: new Date(activity.timestamp).toLocaleString(),
+            }))
+        );
+      })
+      .catch((error) => {
+        console.error("Error fetching dashboard data:", error);
+        if (active) setDashboardError("Dashboard data could not be loaded.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
       });
-      setRecentActivity([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    return () => {
+      active = false;
+    };
+  }, [session, status]);
 
   if (status === "loading") {
     return (
@@ -144,22 +109,6 @@ export default function AdminDashboard() {
       changeType: "positive",
     },
     {
-      title: "Access Requests",
-      value: stats.totalAccessRequests,
-      icon: FileText,
-      color: "from-green-500 to-green-600",
-      change: "+8%",
-      changeType: "positive",
-    },
-    {
-      title: "Total Revenue",
-      value: `$${stats.totalRevenue.toLocaleString()}`,
-      icon: DollarSign,
-      color: "from-purple-500 to-purple-600",
-      change: "+15%",
-      changeType: "positive",
-    },
-    {
       title: "Total Clients",
       value: stats.totalClients,
       icon: Users,
@@ -171,6 +120,13 @@ export default function AdminDashboard() {
 
   const quickActions = [
     {
+      title: "Manage Research",
+      description: "Edit R&D content shown publicly",
+      icon: Search,
+      href: "/admin/research",
+      color: "bg-indigo-500 hover:bg-indigo-600",
+    },
+    {
       title: "Add New Project",
       description: "Create a new project listing",
       icon: Briefcase,
@@ -178,11 +134,25 @@ export default function AdminDashboard() {
       color: "bg-blue-500 hover:bg-blue-600",
     },
     {
-      title: "Manage Access Requests",
-      description: "View and manage access requests",
+      title: "Manage Services",
+      description: "Update published services",
       icon: FileText,
-      href: "/admin/access-requests",
-      color: "bg-green-500 hover:bg-green-600",
+      href: "/admin/services",
+      color: "bg-cyan-500 hover:bg-cyan-600",
+    },
+    {
+      title: "Manage Learning Hub",
+      description: "Update courses and training",
+      icon: BookOpen,
+      href: "/admin/learning-hub",
+      color: "bg-violet-500 hover:bg-violet-600",
+    },
+    {
+      title: "Manage Gallery",
+      description: "Update public gallery entries",
+      icon: Images,
+      href: "/admin/gallery",
+      color: "bg-pink-500 hover:bg-pink-600",
     },
     {
       title: "View Inquiries",
@@ -202,12 +172,8 @@ export default function AdminDashboard() {
 
   const getActivityIcon = (type) => {
     switch (type) {
-      case "access_request":
-        return FileText;
       case "inquiry":
         return MessageSquare;
-      case "testimonial":
-        return Star;
       case "project":
         return Briefcase;
       default:
@@ -217,12 +183,8 @@ export default function AdminDashboard() {
 
   const getActivityColor = (type) => {
     switch (type) {
-      case "access_request":
-        return "text-green-600 bg-green-100";
       case "inquiry":
         return "text-blue-600 bg-blue-100";
-      case "testimonial":
-        return "text-yellow-600 bg-yellow-100";
       case "project":
         return "text-purple-600 bg-purple-100";
       default:
@@ -259,8 +221,14 @@ export default function AdminDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {loading && <p role="status" className="mb-6 text-gray-600">Loading dashboard…</p>}
+        {dashboardError && (
+          <p role="alert" className="mb-6 rounded-lg border border-red-200 bg-red-50 p-3 text-red-800">
+            {dashboardError}
+          </p>
+        )}
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {statCards.map((stat, index) => (
             <motion.div
               key={stat.title}
@@ -417,7 +385,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Additional Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+        <div className="grid grid-cols-1 gap-6 mt-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -438,52 +406,6 @@ export default function AdminDashboard() {
                 </p>
               </div>
               <MessageSquare className="h-8 w-8 text-blue-500" />
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="bg-white rounded-xl shadow-lg p-6"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Pending Access Requests
-                </p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {loading ? (
-                    <div className="animate-pulse bg-gray-200 h-8 w-12 rounded"></div>
-                  ) : (
-                    stats.pendingAccessRequests
-                  )}
-                </p>
-              </div>
-              <FileText className="h-8 w-8 text-green-500" />
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="bg-white rounded-xl shadow-lg p-6"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Client Satisfaction
-                </p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {loading ? (
-                    <div className="animate-pulse bg-gray-200 h-8 w-12 rounded"></div>
-                  ) : (
-                    `${stats.clientSatisfaction}/5`
-                  )}
-                </p>
-              </div>
-              <Star className="h-8 w-8 text-yellow-500" />
             </div>
           </motion.div>
         </div>

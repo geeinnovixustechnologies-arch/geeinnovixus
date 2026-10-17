@@ -14,13 +14,8 @@ const errorMessages = {
   AccessDenied: "Access was denied. You may not have permission to sign in.",
   Verification: "The verification token has expired or has already been used.",
   Default: "An error occurred during authentication.",
-  OAuthAccountNotLinked:
-    "This email is already associated with another account. Please sign in with your original method or contact support.",
-  OAuthCallback: "There was an error with the OAuth provider.",
-  OAuthCreateAccount: "Could not create OAuth account.",
   EmailCreateAccount: "Could not create account with this email.",
   Callback: "There was an error with the callback URL.",
-  OAuthSignin: "There was an error signing in with the OAuth provider.",
   EmailSignin: "There was an error sending the sign-in email.",
   CredentialsSignin: "Sign in failed. Check your credentials and try again.",
   SessionRequired: "Please sign in to access this page.",
@@ -51,15 +46,6 @@ function AuthErrorForm() {
             <CardContent className="space-y-6">
               <div className="text-center">
                 <p className="text-gray-600 mb-4">{errorMessage}</p>
-                {error === "OAuthAccountNotLinked" && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                    <p className="text-sm text-blue-800">
-                      <strong>Solution:</strong> If you previously signed up
-                      with email/password, please use that method instead. If
-                      you need help, contact our support team.
-                    </p>
-                  </div>
-                )}
               </div>
 
               <div className="space-y-3">

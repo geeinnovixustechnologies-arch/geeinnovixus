@@ -5,19 +5,32 @@ import { serviceValidation } from "@/lib/validations.js";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.js";
 
+const MAX_LIMIT = 100;
+const SORT_FIELDS = new Set(["createdAt", "name", "orderCount", "rating.average"]);
+
+function safeInteger(value, fallback) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 // GET /api/services - Get all services
 export async function GET(request) {
   try {
     await connectDB();
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page")) || 1;
-    const limit = parseInt(searchParams.get("limit")) || 12;
+    const page = safeInteger(searchParams.get("page"), 1);
+    const limit = Math.min(safeInteger(searchParams.get("limit"), 12), MAX_LIMIT);
     const category = searchParams.get("category");
     const subcategory = searchParams.get("subcategory");
     const popular = searchParams.get("popular");
     const search = searchParams.get("search");
-    const sortBy = searchParams.get("sortBy") || "createdAt";
+    const requestedSort = searchParams.get("sortBy") || "createdAt";
+    const sortBy = SORT_FIELDS.has(requestedSort) ? requestedSort : "createdAt";
     const sortOrder = searchParams.get("sortOrder") || "desc";
 
     // Check if this is an admin request
@@ -40,17 +53,18 @@ export async function GET(request) {
     }
 
     if (search) {
+      const matcher = new RegExp(escapeRegex(search.trim()), "i");
       query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-        { shortDescription: { $regex: search, $options: "i" } },
-        { tags: { $in: [new RegExp(search, "i")] } },
+        { name: matcher },
+        { description: matcher },
+        { shortDescription: matcher },
+        { tags: { $in: [matcher] } },
       ];
     }
 
     // Build sort object
     const sortObj = {};
-    sortObj[sortBy] = sortOrder === "desc" ? -1 : 1;
+    sortObj[sortBy] = sortOrder === "asc" ? 1 : -1;
 
     // Calculate skip
     const skip = (page - 1) * limit;
@@ -66,20 +80,23 @@ export async function GET(request) {
     const hasNextPage = page < totalPages;
     const hasPrevPage = page > 1;
 
-    return NextResponse.json({
-      services,
-      totalServices: total,
-      page,
-      limit,
-      totalPages,
-      hasNextPage,
-      hasPrevPage,
-    });
+    return NextResponse.json(
+      {
+        services,
+        totalServices: total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage,
+        hasPrevPage,
+      },
+      { headers: { "Cache-Control": "no-store" } }
+    );
   } catch (error) {
     console.error("Error fetching services:", error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch services" },
-      { status: 500 }
+      { status: 500, headers: { "Cache-Control": "no-store" } }
     );
   }
 }
@@ -101,19 +118,25 @@ export async function POST(request) {
     const body = await request.json();
 
     // Validate data
-    const validation = serviceValidation.create.validate(body);
-    if (!validation.isValid) {
+    const validation = serviceValidation.create.validate(body, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
+    if (validation.error) {
       return NextResponse.json(
         {
           success: false,
           message: "Validation failed",
-          errors: validation.errors,
+          errors: validation.error.details.map((detail) => ({
+            field: detail.path.join("."),
+            message: detail.message,
+          })),
         },
         { status: 400 }
       );
     }
 
-    const service = new Service(validation.data);
+    const service = new Service(validation.value);
     await service.save();
 
     return NextResponse.json(

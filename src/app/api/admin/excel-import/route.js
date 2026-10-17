@@ -5,12 +5,7 @@ import connectDB from "@/lib/mongodb.js";
 import * as XLSX from "xlsx";
 import Project from "@/models/Project.js";
 import Service from "@/models/Service.js";
-import Testimonial from "@/models/Testimonial.js";
-import {
-  projectValidation,
-  serviceValidation,
-  testimonialValidation,
-} from "@/lib/validations.js";
+import { projectValidation, serviceValidation } from "@/lib/validations.js";
 
 // POST /api/admin/excel-import - Import data from Excel file
 export async function POST(request) {
@@ -28,7 +23,7 @@ export async function POST(request) {
 
     const formData = await request.formData();
     const file = formData.get("file");
-    const importType = formData.get("type"); // 'projects', 'services', 'testimonials'
+    const importType = formData.get("type");
 
     if (!file) {
       return NextResponse.json(
@@ -39,7 +34,7 @@ export async function POST(request) {
 
     if (
       !importType ||
-      !["projects", "services", "testimonials"].includes(importType)
+      !["projects", "services"].includes(importType)
     ) {
       return NextResponse.json(
         { success: false, message: "Invalid import type" },
@@ -73,9 +68,6 @@ export async function POST(request) {
         break;
       case "services":
         results = await importServices(data);
-        break;
-      case "testimonials":
-        results = await importTestimonials(data);
         break;
       default:
         return NextResponse.json(
@@ -302,68 +294,6 @@ async function importServices(data) {
       await service.save();
 
       results.successful.push(service);
-      results.totalProcessed++;
-    } catch (error) {
-      results.failed.push({
-        data: item,
-        error: error.message,
-      });
-      results.totalProcessed++;
-    }
-  }
-
-  return results;
-}
-
-// Import testimonials from Excel data
-async function importTestimonials(data) {
-  const results = {
-    successful: [],
-    failed: [],
-    totalProcessed: 0,
-  };
-
-  for (const item of data) {
-    try {
-      // Transform Excel data to match our schema
-      const testimonialData = {
-        clientName:
-          item.clientName || item["Client Name"] || item.name || item.Name,
-        clientEmail:
-          item.clientEmail || item["Client Email"] || item.email || item.Email,
-        clientTitle:
-          item.clientTitle || item["Client Title"] || item.title || item.Title,
-        clientCompany:
-          item.clientCompany ||
-          item["Client Company"] ||
-          item.company ||
-          item.Company,
-        rating: parseInt(item.rating || item.Rating || 5),
-        review: item.review || item.Review || item.comment || item.Comment,
-        projectTitle: item.projectTitle || item["Project Title"],
-        projectCategory: item.projectCategory || item["Project Category"],
-        isApproved: item.isApproved === "true" || item.isApproved === true,
-        isFeatured: item.isFeatured === "true" || item.isFeatured === true,
-      };
-
-      // Validate data
-      const validation = testimonialValidation.create.validate(testimonialData);
-      if (!validation.isValid) {
-        results.failed.push({
-          data: item,
-          error: `Validation failed: ${validation.errors
-            .map((e) => e.message)
-            .join(", ")}`,
-        });
-        results.totalProcessed++;
-        continue;
-      }
-
-      // Create testimonial
-      const testimonial = new Testimonial(validation.data);
-      await testimonial.save();
-
-      results.successful.push(testimonial);
       results.totalProcessed++;
     } catch (error) {
       results.failed.push({

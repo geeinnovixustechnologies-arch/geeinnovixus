@@ -96,61 +96,63 @@ pnpm install
 
 ### 3. Environment Setup
 
-Copy the environment template and configure your variables:
+Copy the environment template to the ignored local environment file and configure
+your local MongoDB URI, a unique NextAuth secret, and private admin credentials:
 
 ```bash
 cp env.example .env.local
 ```
 
-Edit `.env.local` with your configuration:
+Use a local MongoDB instance and the dedicated development database:
 
 ```env
-# Database
-MONGODB_URI=mongodb://localhost:27017/gee-innovations
-
-# NextAuth
-NEXTAUTH_SECRET=your-secret-key-here
+MONGODB_URI=mongodb://127.0.0.1:27017/geeinnovixus_dev
+NEXTAUTH_SECRET=<unique-local-secret>
 NEXTAUTH_URL=http://localhost:3000
-
-# Tigris S3
-TIGRIS_ENDPOINT=https://fly.storage.tigris.dev
-TIGRIS_ACCESS_KEY_ID=your-access-key
-TIGRIS_SECRET_ACCESS_KEY=your-secret-key
-TIGRIS_BUCKET_NAME=your-bucket-name
-
-# Firebase
-FIREBASE_API_KEY=your-firebase-api-key
-FIREBASE_PROJECT_ID=your-project-id
-# ... other Firebase config
-
-# Email
-EMAIL_SERVER_HOST=smtp.gmail.com
-EMAIL_SERVER_USER=your-email@gmail.com
-EMAIL_SERVER_PASSWORD=your-app-password
+ADMIN_EMAIL=<your-private-admin-email>
+ADMIN_PASSWORD=<your-private-password-at-least-12-characters>
 ```
 
-### 4. Database Setup
+`ADMIN_EMAIL` and `ADMIN_PASSWORD` are developer-supplied provisioning inputs. Do not
+commit `.env.local` or paste its values into client-side code. Google and other
+third-party sign-in are not enabled. Admin accounts can only be created by the local
+provisioning script; the script hashes the password, never prints it, and refuses to
+run if any admin already exists.
 
-Make sure MongoDB is running and create the database:
+### 4. Provision the single admin account
+
+Start MongoDB locally, then explicitly create the admin:
 
 ```bash
-# If using local MongoDB
-mongod
-
-# The application will automatically create collections and indexes
+npm run provision:admin
 ```
 
-### 5. Run the Development Server
+### Seed local content
+
+After provisioning the admin, optionally set `SEED_GALLERY_IMAGE_URL_1` and
+`SEED_GALLERY_IMAGE_URL_2` in `.env.local` to publicly viewable Google Drive file
+links. Then run:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+npm run seed:content
+```
+
+This command inserts sample Research, Projects, Services, and Learning Hub records,
+plus Gallery examples when public Drive links are configured. It is restricted to the
+local `geeinnovixus_dev` database, seeds only empty collections, and skips collections
+that already contain records. Replace sample captions and details with accurate content
+before publishing.
+
+Run the production build and server:
+
+```bash
+npm run build
+npm start
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+Sign in at `/auth/signin` with the credentials configured in your ignored `.env.local`.
+For development, use `npm run dev` instead of `npm start`.
 
 ## 📁 Project Structure
 

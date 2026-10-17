@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu,
@@ -16,10 +16,9 @@ import {
   FileText,
   MessageSquare,
   Shield,
-  Lock,
   Search,
-  GraduationCap,
   BookOpen,
+  Images,
 } from "lucide-react";
 
 export default function Navigation() {
@@ -28,27 +27,21 @@ export default function Navigation() {
 
   const navigation = [
     { name: "Home", href: "/", icon: Home },
-    { name: "Research & Development", href: "/research", icon: Search },
+    { name: "R & D", href: "/research", icon: Search },
     { name: "Projects", href: "/projects", icon: Briefcase },
     { name: "Services", href: "/services", icon: FileText },
-    { name: "Courses", href: "/courses", icon: BookOpen },
-    { name: "Training & Workshop", href: "/training", icon: GraduationCap },
+    { name: "Learning Hub", href: "/learning-hub", icon: BookOpen },
+    { name: "Gallery", href: "/gallery", icon: Images },
     { name: "Contact", href: "/contact", icon: MessageSquare },
   ];
 
   const adminNavigation = [
     { name: "Dashboard", href: "/admin", icon: Shield },
-    { name: "Research & Development", href: "/admin/research", icon: Search },
+    { name: "R & D", href: "/admin/research", icon: Search },
     { name: "Projects", href: "/admin/projects", icon: Briefcase },
     { name: "Services", href: "/admin/services", icon: FileText },
-    { name: "Courses", href: "/admin/courses", icon: BookOpen },
-    {
-      name: "Training & Workshop",
-      href: "/admin/training",
-      icon: GraduationCap,
-    },
-    { name: "Access Requests", href: "/admin/access-requests", icon: Lock },
-    { name: "Testimonials", href: "/admin/testimonials", icon: MessageSquare },
+    { name: "Learning Hub", href: "/admin/learning-hub", icon: BookOpen },
+    { name: "Gallery", href: "/admin/gallery", icon: Images },
   ];
 
   return (
@@ -141,13 +134,20 @@ export default function Navigation() {
                 </div>
               ) : (
                 <div className="flex items-center space-x-4">
-                  <button
-                    onClick={() => signIn()}
-                    disabled
-                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                  <Link
+                    href="/auth/signin"
+                    aria-label="Click to sign in as admin"
+                    title="Click to sign in as admin"
+                    className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-700 transition-colors hover:text-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                   >
-                    Sign In
-                  </button>
+                    <Shield aria-hidden="true" className="h-5 w-5" />
+                    <span
+                      role="tooltip"
+                      className="pointer-events-none absolute right-0 top-full z-50 mt-2 w-max rounded-md bg-slate-900 px-3 py-2 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+                    >
+                      Click to sign in as admin
+                    </span>
+                  </Link>
                   <Link
                     href="/"
                     className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
@@ -260,22 +260,15 @@ export default function Navigation() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <button
-                      onClick={() => {
-                        signIn();
-                        setIsOpen(false);
-                      }}
-                      className="flex items-center w-full text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium"
-                    >
-                      <User className="h-5 w-5 mr-3" />
-                      Sign In
-                    </button>
                     <Link
-                      href="/auth/signup"
-                      className="flex items-center w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-2 rounded-md text-base font-medium hover:from-blue-700 hover:to-purple-700"
+                      href="/auth/signin"
+                      aria-label="Click to sign in as admin"
+                      title="Click to sign in as admin"
                       onClick={() => setIsOpen(false)}
+                      className="flex items-center w-full rounded-md px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600"
                     >
-                      Get Started
+                      <Shield aria-hidden="true" className="mr-3 h-5 w-5" />
+                      Admin sign in
                     </Link>
                   </div>
                 )}

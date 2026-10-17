@@ -4,22 +4,24 @@
 
 - Node.js version declared by the project, npm, and access to the project's MongoDB
   database.
-- Tigris S3-compatible bucket configuration available through the existing environment
-  variables: `TIGRIS_ENDPOINT`, `TIGRIS_REGION`, `TIGRIS_ACCESS_KEY_ID`,
-  `TIGRIS_SECRET_ACCESS_KEY`, and `TIGRIS_BUCKET_NAME`.
 - A test administrator account and a non-admin account.
 - Valid NextAuth environment configuration for the local application.
+- Publicly viewable Google Drive links to image files (shared with "Anyone with the link").
 
 ## Start the application
 
 ```powershell
 npm ci
+npm run migrate:learning-offerings
 npm run dev
 ```
 
+Run the migration once against the configured MongoDB database before starting the
+application. It is safe to rerun: existing title/category records are not overwritten
+or duplicated.
+
 Expected result: the application starts; `/learning-hub` and `/gallery` are reachable.
-If database or Tigris configuration is absent, configure it locally without committing
-secrets.
+The gallery feature requires no file-storage credentials.
 
 ## Validate the Learning Hub
 
@@ -39,19 +41,22 @@ usable.
 ## Validate Gallery administration and public view
 
 1. Sign in as admin and open the gallery management page.
-2. Upload one valid JPEG/PNG/WebP image with non-empty alternative text, caption, and
-   category. Verify it appears in the management list and public Gallery.
-3. Try missing metadata, an unsupported file type, and an oversized file; verify clear
-   validation errors and no published gallery entry.
-4. Delete an image and verify the public entry disappears and its stored object is
-   removed, with an explicit error if storage removal fails.
+2. Add a publicly viewable Google Drive image URL with non-empty alternative text,
+   caption, and category. Verify the image appears in the management list and public
+   Gallery.
+3. Try an invalid or non-Google Drive URL and missing metadata; verify clear validation
+   errors and no published gallery entry.
+4. Delete a gallery entry and verify it disappears from the public gallery while its
+   Google Drive file remains unchanged.
 5. Open the Gallery as a visitor; verify image context and alternative text, newest-first
-   ordering, loading/empty states, and resilience when an image URL is unavailable.
+   ordering, loading/empty states, and resilience when a link is private, deleted, or
+   otherwise unavailable.
 6. Call gallery create/delete endpoints as an unauthenticated user and as a non-admin;
    verify requests are rejected without modifying records or objects.
 
-Expected result: only admins can manage gallery content; public users can view published
-images and understandable fallback states.
+Expected result: only admins can manage URL metadata; public users can view published
+images and understandable fallback states. The application does not upload or delete
+image files.
 
 ## Validate shared navigation
 

@@ -9,7 +9,12 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "test": "node --test",
+    "lint": "eslint",
+    "provision:admin": "node scripts/provision-admin.mjs",
+    "seed:content": "node scripts/seed-content.mjs",
+    "seed:learning-hub": "node scripts/seed-learning-hub.mjs",
+    "migrate:learning-offerings": "node scripts/migrate-learning-offerings.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.892.0",

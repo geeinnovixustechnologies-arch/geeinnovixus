@@ -23,15 +23,18 @@ export async function GET(request, { params }) {
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      data: service,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        data: service,
+      },
+      { headers: { "Cache-Control": "no-store" } }
+    );
   } catch (error) {
     console.error("Error fetching service:", error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch service" },
-      { status: 500 }
+      { status: 500, headers: { "Cache-Control": "no-store" } }
     );
   }
 }
@@ -53,14 +56,23 @@ export async function PUT(request, { params }) {
 
     const body = await request.json();
 
-    // For admin operations, we might want to allow partial updates
-    // without full validation
-    const updateData = { ...body };
-    delete updateData._id; // Remove _id if present
-    delete updateData.createdAt; // Prevent modification of creation date
-    delete updateData.updatedAt; // Let mongoose handle this
+    const validation = serviceValidation.update.validate(body, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
+    if (validation.error || Object.keys(validation.value || {}).length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: validation.error
+            ? validation.error.details.map((detail) => detail.message).join(", ")
+            : "At least one supported field is required.",
+        },
+        { status: 400 }
+      );
+    }
 
-    const service = await Service.findByIdAndUpdate(id, updateData, {
+    const service = await Service.findByIdAndUpdate(id, validation.value, {
       new: true,
       runValidators: true,
     });
@@ -101,11 +113,7 @@ export async function DELETE(request, { params }) {
 
     await connectDB();
 
-    const service = await Service.findByIdAndUpdate(
-      id,
-      { isActive: false },
-      { new: true }
-    );
+    const service = await Service.findByIdAndDelete(id);
 
     if (!service) {
       return NextResponse.json(
@@ -116,7 +124,7 @@ export async function DELETE(request, { params }) {
 
     return NextResponse.json({
       success: true,
-      message: "Service deleted successfully",
+      message: "Service permanently deleted",
     });
   } catch (error) {
     console.error("Error deleting service:", error);

@@ -4,11 +4,9 @@ import AccessRequest from "@/models/AccessRequest.js";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.js";
 
-// GET /api/access-requests/history - Get user's access request history
 export async function GET(request) {
   try {
     const session = await getServerSession(authOptions);
-
     if (!session) {
       return NextResponse.json(
         { success: false, message: "Authentication required" },
@@ -17,25 +15,17 @@ export async function GET(request) {
     }
 
     await connectDB();
-
     const { searchParams } = new URL(request.url);
     const projectId = searchParams.get("projectId");
+    const query = { user: session.user.id };
+    if (projectId) query.project = projectId;
 
-    let query = { user: session.user.id };
-    if (projectId) {
-      query.project = projectId;
-    }
-
-    // Get user's access request history
     const accessRequests = await AccessRequest.find(query)
       .populate("project", "title category pricing")
       .sort({ createdAt: -1 })
       .lean();
 
-    return NextResponse.json({
-      success: true,
-      data: accessRequests,
-    });
+    return NextResponse.json({ success: true, data: accessRequests });
   } catch (error) {
     console.error("Error fetching access request history:", error);
     return NextResponse.json(

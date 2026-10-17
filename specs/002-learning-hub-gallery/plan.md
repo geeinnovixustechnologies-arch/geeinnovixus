@@ -12,8 +12,9 @@ Consolidate the existing course and training/workshop public catalogs into one
 administrator-managed Learning Hub using the current course-style presentation. Move
 learning offerings into a persistent shared catalog, add protected admin management and
 public read behavior, and redirect old catalog links to the canonical Learning Hub.
-Add an admin-managed public gallery whose image files use the existing Tigris storage
-integration and whose metadata is stored with MongoDB. Update shared public navigation
+Add an admin-managed public gallery that stores publicly viewable Google Drive image
+URLs and associated metadata in MongoDB; administrators do not upload files through the
+application and removing a gallery entry does not affect Drive. Update shared public navigation
 with the R & D label and an accessible admin sign-in icon while preserving existing
 destinations and authentication.
 
@@ -21,11 +22,11 @@ destinations and authentication.
 
 **Language/Version**: JavaScript (ES modules), Node.js 24.x
 
-**Primary Dependencies**: Next.js 16, React 19, NextAuth.js 4, Mongoose, existing
-AWS S3 SDK/Tigris storage helper, Tailwind CSS, Lucide React
+**Primary Dependencies**: Next.js 16, React 19, NextAuth.js 4, Mongoose, Tailwind CSS,
+Lucide React
 
-**Storage**: MongoDB for learning and gallery metadata; existing Tigris S3-compatible
-bucket for gallery image objects
+**Storage**: MongoDB for learning and gallery metadata; publicly viewable image files
+remain in Google Drive and are referenced by URL
 
 **Testing**: Existing ESLint CLI and Next.js production build; focused API/manual
 acceptance checks documented in `quickstart.md`. No dedicated test runner is currently
@@ -41,9 +42,9 @@ catalog and gallery pages must remain navigable and usable at supported mobile a
 desktop sizes.
 
 **Constraints**: Preserve existing course-style content and authentication destinations;
-admin writes require server-side admin authorization; image uploads must use durable
-object storage rather than Vercel's local filesystem; do not add dependencies when
-existing project facilities meet the requirement.
+admin writes require server-side admin authorization; gallery images are referenced by
+public Google Drive URLs and are not uploaded or mutated by this application; do not add
+dependencies when existing project facilities meet the requirement.
 
 **Scale/Scope**: One public learning catalog, one public gallery, corresponding
 administrator workflows, and the shared public navigation. No new approval workflow,
@@ -54,14 +55,15 @@ advanced gallery filtering, or additional hosting targets.
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 - **Existing Libraries First**: PASS — use the project's Mongoose, NextAuth, UI
-  components, Lucide icons, and Tigris/S3 helper; no new package is required.
+  components, and Lucide icons; no new package or gallery storage integration is
+  required.
 - **Consistent UI Across Pages**: PASS — reuse the course page patterns and shared
   navigation/admin UI components; provide responsive views.
-- **Complete and Accessible User Journeys**: PASS — include loading, empty, upload
-  failure, image fallback, permission-denied, keyboard focus, and touch behavior.
+- **Complete and Accessible User Journeys**: PASS — include loading, empty, invalid URL,
+  image fallback, permission-denied, keyboard focus, and touch behavior.
 - **Secure and Privacy-Conscious Engineering**: PASS — authorize all management
-  operations on the server, validate image metadata and uploads, and do not expose
-  storage credentials.
+  operations on the server, validate Google Drive URLs and metadata, do not fetch
+  administrator-provided URLs server-side, and do not expose credentials.
 - **Verifiable Quality**: PASS — validate API success/denial and UI states with focused
   acceptance checks, then run build and lint checks available in the repository.
 
@@ -96,14 +98,14 @@ src/
 │   │   └── gallery/                  # Gallery management
 │   └── api/
 │       ├── learning-offerings/       # Public reads and protected management
-│       └── gallery/                  # Public reads and protected media management
+│       └── gallery/                  # Public reads and protected URL metadata management
 ├── components/
 │   └── Navigation.js                 # Shared public navigation labels and admin entry
 ├── lib/
-│   └── storage.js                    # Existing Tigris upload/delete helpers
+│   └── google-drive-image-url.js     # Google Drive URL validation and display URL
 └── models/
     ├── LearningOffering.js           # Unified course-style catalog entity
-    └── GalleryImage.js               # Gallery image metadata entity
+    └── GalleryImage.js               # Google Drive URL and gallery metadata entity
 ```
 
 **Structure Decision**: Extend the existing single Next.js App Router application.
@@ -123,21 +125,20 @@ application or package boundary.
 3. Add one course-style Learning Hub list/detail UX and one unified admin management
    workflow. Route old `/courses` and `/training` links to the canonical hub without
    exposing separate structures.
-4. Add gallery metadata model and public/admin API. Validate image type, size, alt text,
-   caption, and category; upload image objects to Tigris via existing helpers; persist
-   metadata only after successful upload and attempt object cleanup if persistence fails.
-   On deletion, hide the image first, then remove object and metadata; preserve an
-   inactive retryable record if storage deletion fails.
-5. Add Gallery public/admin pages with required alt text, event/course context, responsive
-   image layout, empty/loading/unavailable states, and upload/delete feedback.
+4. Add a gallery metadata model and public/admin API. Admins submit publicly accessible
+   Google Drive image URLs plus alt text and event/course context. Validate the URL
+   without fetching it server-side, store only metadata, and remove only the metadata
+   record on deletion.
+5. Add Gallery public/admin pages with a Drive URL field, required alt text and context,
+   responsive image layout, empty/loading/unavailable states, and create/delete feedback.
 6. Update shared navigation label, Gallery/Learning Hub destinations, and the admin
    sign-in icon with accessible name, focus hint, and touch-compatible activation.
-7. Verify data conversion and routes, admin-only management, visitor-facing pages, old
-   link redirects, ESLint, and production build.
+7. Verify data conversion and routes, admin-only management, Drive URL validation and
+   rendering, visitor-facing pages, old link redirects, ESLint, and production build.
 
 ## Complexity Tracking
 
 No constitution violations. The two new MongoDB entities are required because current
 course and training content is hardcoded in separate pages and gallery entries require
-persistent metadata. Tigris storage is already used by the project; no new storage
-dependency is proposed.
+persistent metadata. Gallery image bytes remain in Google Drive; the application stores
+only a public URL and descriptive metadata.

@@ -4,10 +4,10 @@ import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   Search,
+  Award,
   BookOpen,
   FileText,
   Users,
-  Award,
   Clock,
   Star,
   ExternalLink,
@@ -15,6 +15,8 @@ import {
   Microscope,
   Beaker,
   Code,
+  Brain,
+  Leaf,
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -36,162 +38,66 @@ import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { GridPattern } from "@/components/ui/grid-pattern";
 import { MagicCard } from "@/components/ui/magic-card";
 
+const researchIcons = {
+  award: Award,
+  beaker: Beaker,
+  "book-open": BookOpen,
+  brain: Brain,
+  code: Code,
+  filetext: FileText,
+  "file-text": FileText,
+  leaf: Leaf,
+  lightbulb: Lightbulb,
+  microscope: Microscope,
+};
+
 export default function ResearchPage() {
   const [research, setResearch] = useState([]);
-  const [filteredResearch, setFilteredResearch] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedDomain, setSelectedDomain] = useState("all");
 
-  // Research: engineering domains (Civil, Mechanical, Electrical, CSE, ECE)
-  const mockResearch = useMemo(
-    () => [
-      {
-        _id: "r1",
-        title: "Civil Engineering",
-        description:
-          "Concrete technology, structural and geotechnical research domains",
-        category: "Engineering",
-        domain: "Civil",
-        services: [
-          "3D Printing Concrete",
-          "Self Healing Bacterial Concrete",
-          "Ultra-High Performance Concrete",
-          "Geogrids in Concrete",
-          "Geopolymer Concrete",
-        ],
-        features: ["Design & Analysis", "Material Science"],
-        deliveryTime: "2-8 weeks",
-        popularity: 95,
-        rating: 4.8,
-        icon: "🏗️",
-        color: "primary",
-      },
-      {
-        _id: "r2",
-        title: "Mechanical Engineering",
-        description:
-          "Design, simulation, advanced manufacturing and thermal analysis",
-        category: "Engineering",
-        domain: "Mechanical",
-        services: [
-          "3D Printing (FDM)",
-          "Thermal 3D Printing",
-          "Materials & Metallurgy",
-          "Advanced Manufacturing",
-          "Simulation",
-        ],
-        features: ["Solidworks", "ANSYS", "Abaqus"],
-        deliveryTime: "3-10 weeks",
-        popularity: 88,
-        rating: 4.7,
-        icon: "⚙️",
-        color: "secondary",
-      },
-      {
-        _id: "r3",
-        title: "Electrical & Electronic Engineering",
-        description: "Power systems, electronics, control and communication",
-        category: "Engineering",
-        domain: "EEE",
-        services: [
-          "Power Systems",
-          "Power Electronics",
-          "Microelectronics & VLSI",
-          "Control Systems",
-          "Signal Processing",
-          "Machine Learning",
-          "Communication Systems",
-        ],
-        features: ["MATLAB", "Embedded", "RF"],
-        deliveryTime: "2-6 weeks",
-        popularity: 92,
-        rating: 4.9,
-        icon: "⚡",
-        color: "success",
-      },
-      {
-        _id: "r4",
-        title: "Computer Science Engineering",
-        description:
-          "Software engineering, AI/ML, data science and cybersecurity",
-        category: "Engineering",
-        domain: "CSE",
-        services: [
-          "Software Development",
-          "Machine Learning",
-          "Data Science",
-          "Computer Networks",
-          "Cybersecurity",
-        ],
-        features: ["Programming", "Databases"],
-        deliveryTime: "2-8 weeks",
-        popularity: 90,
-        rating: 4.8,
-        icon: "💻",
-        color: "warning",
-      },
-      {
-        _id: "r5",
-        title: "Electronic Communication Engineering",
-        description: "Communication systems, embedded and IoT research",
-        category: "Engineering",
-        domain: "ECE",
-        services: [
-          "Communication Systems",
-          "Embedded Systems & IoT",
-          "Signal Processing",
-          "Power Electronics",
-          "RF & Microwave",
-          "Nanotechnology",
-        ],
-        features: ["Wireless", "Optical"],
-        deliveryTime: "2-6 weeks",
-        popularity: 85,
-        rating: 4.6,
-        icon: "📡",
-        color: "primary",
-      },
-    ],
-    []
-  );
-
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setResearch(mockResearch);
-      setFilteredResearch(mockResearch);
-      setLoading(false);
-    }, 1000);
-  }, [mockResearch]);
+    const controller = new AbortController();
+    const loadResearch = async () => {
+      try {
+        const response = await fetch("/api/research", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error("Research could not be loaded.");
+        const data = await response.json();
+        setResearch(Array.isArray(data.research) ? data.research : []);
+      } catch (fetchError) {
+        if (fetchError.name !== "AbortError") {
+          setError("Research could not be loaded. Please try again later.");
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    };
+    loadResearch();
+    return () => controller.abort();
+  }, []);
 
-  useEffect(() => {
-    let filtered = research;
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (item) =>
-          item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.services.some((service) =>
-            service.toLowerCase().includes(searchTerm.toLowerCase())
-          )
+  const filteredResearch = useMemo(() => {
+    const query = searchTerm.toLowerCase();
+    return research.filter((item) => {
+      const matchesSearch =
+        !query ||
+        item.title.toLowerCase().includes(query) ||
+        item.description.toLowerCase().includes(query) ||
+        (item.services || []).some((service) =>
+          service.toLowerCase().includes(query)
+        );
+      return (
+        matchesSearch &&
+        (selectedCategory === "all" || item.category === selectedCategory) &&
+        (selectedDomain === "all" || item.domain === selectedDomain)
       );
-    }
-
-    // Filter by category
-    if (selectedCategory !== "all") {
-      filtered = filtered.filter((item) => item.category === selectedCategory);
-    }
-
-    // Filter by domain
-    if (selectedDomain !== "all") {
-      filtered = filtered.filter((item) => item.domain === selectedDomain);
-    }
-
-    setFilteredResearch(filtered);
+    });
   }, [research, searchTerm, selectedCategory, selectedDomain]);
 
   const categories = ["all", ...new Set(research.map((item) => item.category))];
@@ -362,17 +268,20 @@ export default function ResearchPage() {
       <section className="py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-            {filteredResearch.map((item) => (
-              <MagicCard
-                key={item._id}
-                className="h-full p-6 bg-white/80 backdrop-blur-sm border border-gray-200/50"
-                gradientColor="rgba(59, 130, 246, 0.1)"
-                borderColor="rgba(59, 130, 246, 0.2)"
-                spotlightColor="rgba(59, 130, 246, 0.1)"
-              >
+            {filteredResearch.map((item) => {
+              const Icon =
+                researchIcons[item.icon?.trim().toLowerCase()] || Lightbulb;
+              return (
+                <MagicCard
+                    key={item._id}
+                    className="h-full p-6 bg-white/80 backdrop-blur-sm border border-gray-200/50"
+                    gradientColor="rgba(59, 130, 246, 0.1)"
+                    borderColor="rgba(59, 130, 246, 0.2)"
+                    spotlightColor="rgba(59, 130, 246, 0.1)"
+                  >
                 <div className="flex items-center justify-between w-full mb-4">
                   <div className="flex items-center space-x-3">
-                    <span className="text-3xl">{item.icon}</span>
+                    <Icon aria-hidden="true" className="h-8 w-8 text-blue-600" />
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">
                         {item.title}
@@ -413,12 +322,12 @@ export default function ResearchPage() {
                     Features:
                   </h4>
                   <div className="flex flex-wrap gap-1">
-                    {item.features.slice(0, 3).map((feature, index) => (
+                    {(item.features || []).slice(0, 3).map((feature, index) => (
                       <Badge key={index} variant="outline" className="text-xs">
                         {feature}
                       </Badge>
                     ))}
-                    {item.features.length > 3 && (
+                    {(item.features || []).length > 3 && (
                       <Badge variant="outline" className="text-xs">
                         +{item.features.length - 3} more
                       </Badge>
@@ -432,11 +341,18 @@ export default function ResearchPage() {
                 >
                   Chat on WhatsApp
                 </WhatsAppButton>
-              </MagicCard>
-            ))}
+                </MagicCard>
+              );
+            })}
           </div>
 
-          {filteredResearch.length === 0 && (
+          {error && (
+            <p role="alert" className="py-16 text-center text-red-700">
+              {error}
+            </p>
+          )}
+
+          {!error && filteredResearch.length === 0 && (
             <div className="text-center py-16">
               <p className="text-gray-500 text-lg">
                 No research services found matching your criteria.

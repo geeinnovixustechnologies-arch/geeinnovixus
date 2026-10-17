@@ -28,18 +28,22 @@ training/workshop content adapted into those fields.
 - Keep hardcoded public content: rejected because administrators must manage the unified
   catalog.
 
-## Decision: Store gallery image files in the existing Tigris S3-compatible storage
+## Decision: Store and render admin-provided Google Drive URLs
 
-**Rationale**: The project already provides `src/lib/storage.js` for uploads and deletes
-using Tigris. The project targets Vercel, where local application filesystem writes are
-not durable shared media storage. Gallery file objects should use Tigris, while MongoDB
-stores the public URL, object key, alt text, context, category, author, and timestamps.
+**Rationale**: The user specified that administrators will upload images to Google Drive
+themselves and enter the resulting URL in the admin gallery. The application stores that
+public URL and associated metadata in MongoDB, then derives an embeddable Google Drive
+image URL for the browser. Google Drive files must be shared so anyone with the link can
+view them. Removing a gallery entry deletes only its metadata; the Drive file is not
+modified.
 
 **Alternatives considered**:
-- Write gallery files under `public/uploads`: rejected because Vercel's deployed
-  filesystem is not a durable writeable media store.
-- Add a new image-hosting dependency: rejected because a suitable storage integration
-  already exists.
+- Upload files through this application's API or store them in Tigris: rejected because
+  the requested workflow is URL-only and should not add file-upload or storage
+  infrastructure.
+- Fetch the provided URL on the server to validate it: rejected to avoid SSRF and
+  unnecessary network access; URL shape is validated and actual availability is handled
+  by the browser's image error fallback.
 
 ## Decision: Enforce gallery and learning administration at server API boundaries
 
@@ -74,9 +78,10 @@ canonical Learning Hub route and preserve old course links.
 **Alternatives considered**:
 - Return not found for old URLs: rejected because it unnecessarily breaks existing links.
 
-## Unresolved external configuration
+## Google Drive URL behavior
 
-Tigris credentials and bucket configuration are environment-specific. Planning does not
-assume credentials are present in the repository; deployment configuration must be
-verified during implementation, and upload failures must be surfaced without publishing
-incomplete gallery records.
+Accept HTTPS `drive.google.com` file/share links with a recognizable file ID and render
+them through the Drive `uc?export=view&id=...` image endpoint. The original URL is
+preserved as metadata. The source file must be publicly viewable; private, deleted, or
+non-image files display the per-image unavailable state. The application never fetches
+URLs server-side and never uploads, deletes, or changes Drive files.

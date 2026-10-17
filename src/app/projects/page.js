@@ -41,6 +41,7 @@ import { MagicCard } from "@/components/ui/magic-card";
 export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedDomain, setSelectedDomain] = useState("all");
@@ -89,120 +90,24 @@ export default function ProjectsPage() {
     { value: "rating.average", label: "Highest Rated" },
   ];
 
-  // Mock data for demonstration
-  const mockProjects = [
-    {
-      _id: "1",
-      title: "AI-Powered Medical Diagnosis System",
-      shortDescription:
-        "Advanced machine learning system for medical image analysis and diagnosis assistance.",
-      category: "AI/ML",
-      domain: [
-        "Artificial Intelligence",
-        "Machine Learning",
-        "Computer Vision",
-      ],
-      technologies: ["Python", "TensorFlow", "OpenCV", "React"],
-      pricing: {
-        basePrice: 2500,
-        currency: "USD",
-        isOnSale: true,
-        discountedPrice: 2000,
-      },
-      difficulty: "advanced",
-      estimatedTime: "8-12 weeks",
-      images: [
-        { url: "/api/placeholder/400/300", alt: "AI Medical Diagnosis" },
-      ],
-      demoUrl: "https://demo.example.com",
-      downloadUrl: "https://download.example.com",
-      features: [
-        "Real-time diagnosis",
-        "Multi-modal analysis",
-        "Cloud integration",
-      ],
-      views: 1250,
-      rating: { average: 4.8, count: 45 },
-      tags: ["healthcare", "ai", "medical", "diagnosis"],
-      createdAt: "2024-01-15",
-    },
-    {
-      _id: "2",
-      title: "Blockchain Voting System",
-      shortDescription:
-        "Secure and transparent voting system built on blockchain technology.",
-      category: "Blockchain",
-      domain: ["Blockchain", "Web3", "Full Stack"],
-      technologies: ["Solidity", "Web3.js", "React", "Node.js"],
-      pricing: { basePrice: 1800, currency: "USD" },
-      difficulty: "intermediate",
-      estimatedTime: "6-8 weeks",
-      images: [{ url: "/api/placeholder/400/300", alt: "Blockchain Voting" }],
-      demoUrl: "https://demo.example.com",
-      downloadUrl: "https://download.example.com",
-      features: ["Secure voting", "Transparent results", "Smart contracts"],
-      views: 980,
-      rating: { average: 4.6, count: 32 },
-      tags: ["blockchain", "voting", "security", "democracy"],
-      createdAt: "2024-01-10",
-    },
-    {
-      _id: "3",
-      title: "E-Commerce Platform with AI Recommendations",
-      shortDescription:
-        "Modern e-commerce platform with AI-powered product recommendations.",
-      category: "Web Development",
-      domain: ["Full Stack", "Artificial Intelligence"],
-      technologies: ["React", "Node.js", "MongoDB", "Python", "TensorFlow"],
-      pricing: {
-        basePrice: 3200,
-        currency: "USD",
-        isOnSale: true,
-        discountedPrice: 2800,
-      },
-      difficulty: "advanced",
-      estimatedTime: "10-14 weeks",
-      images: [{ url: "/api/placeholder/400/300", alt: "E-Commerce Platform" }],
-      demoUrl: "https://demo.example.com",
-      downloadUrl: "https://download.example.com",
-      features: [
-        "AI recommendations",
-        "Payment integration",
-        "Admin dashboard",
-      ],
-      views: 2100,
-      rating: { average: 4.9, count: 67 },
-      tags: ["ecommerce", "ai", "recommendations", "fullstack"],
-      createdAt: "2024-01-05",
-    },
-  ];
-
-  // useEffect(() => {
-  //   // Simulate API call
-  //   const fetchProjects = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const response = await fetch("/api/projects");
-  //       const data = await response.json();
-  //       setProjects(data.projects || []);
-  //     } catch (error) {
-  //       console.error("Error fetching projects:", error);
-  //       // Fallback to mock data
-  //       setProjects(mockProjects);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchProjects();
-  // }, [
-  //   searchTerm,
-  //   selectedCategory,
-  //   selectedDomain,
-  //   selectedDifficulty,
-  //   sortBy,
-  //   sortOrder,
-  // ]);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/projects", { cache: "no-store", signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Projects could not be loaded.");
+        const data = await response.json();
+        setProjects(Array.isArray(data.projects) ? data.projects : []);
+      })
+      .catch((fetchError) => {
+        if (fetchError.name !== "AbortError") {
+          setError("Projects could not be loaded. Please try again later.");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, []);
 
   const filteredProjects = projects.filter((project) => {
     const matchesSearch =
@@ -494,6 +399,10 @@ export default function ProjectsPage() {
                 </div>
               ))}
             </div>
+          ) : error ? (
+            <p role="alert" className="py-16 text-center text-red-700">
+              {error}
+            </p>
           ) : (
             <>
               <div className="flex justify-between items-center mb-8">

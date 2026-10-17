@@ -36,32 +36,26 @@ Represents one real event/course image published in the public gallery.
 
 | Field | Type | Required | Validation / purpose |
 |---|---|---:|---|
-| `url` | String | Yes | Publicly retrievable image URL returned by configured Tigris storage |
-| `storageKey` | String | Yes | Object key used to remove the stored image |
-| `altText` | String | Yes | Trimmed, meaningful, non-empty text alternative |
-| `caption` | String | Yes | Short context describing the image, event, or course |
+| `url` | String | Yes | HTTPS Google Drive share URL with a recognizable file ID; file must be viewable by anyone with the link |
+| `altText` | String | Yes | Trimmed, meaningful, non-empty text alternative; maximum 300 characters |
+| `caption` | String | Yes | Short context describing the image, event, or course; maximum 500 characters |
 | `category` | String | Yes | `event` or `course` |
 | `postedBy` | ObjectId/User reference | Yes | Authenticated administrator who published the image |
 | `isActive` | Boolean | Yes | Defaults to true; inactive images are excluded from public reads |
-| `deletionPending` | Boolean | Yes | Defaults to false; true when public visibility is removed but storage deletion needs retry |
 | `createdAt` | Date | Yes | Publication timestamp; managed by timestamps |
 | `updatedAt` | Date | Yes | Last metadata update; managed by timestamps |
 
-**Validation**: Accept only allowed image media types and the existing upload size
-limit unless a separately approved product constraint changes it. Validate required
-metadata before persistence. Do not trust client-provided storage keys or remote URLs for
-deletion. Only an admin may create or delete records.
+**Validation**: Require HTTPS and the exact `drive.google.com` host, and require a
+recognizable Google Drive file ID. Validate required metadata before persistence. Do not
+fetch remote URLs from the server. Only an admin may create or delete records.
 
-**Lifecycle**: Validate admin and inputs; upload image to Tigris; create metadata record
-only after upload succeeds; expose active records to public reads. On admin delete, first
-remove the record from public visibility, then remove the object and metadata. If storage
-deletion fails, retain an inactive record with `deletionPending=true` so the operation
-can be retried. Partial failures must be surfaced and handled without silently reporting
-success.
+**Lifecycle**: Validate admin and inputs; persist the URL and metadata; expose active
+records to public reads. On admin delete, remove only the metadata record. The image file
+remains in Google Drive and is never uploaded, deleted, or modified by the application.
 
 ## Relationships
 
-- Each GalleryImage references the User who posted it.
+- Each GalleryImage references the User who posted the URL.
 - LearningOffering and GalleryImage are independent entities; gallery `category` and
   caption associate an image with a course or event without requiring the referenced
   offering to remain active.

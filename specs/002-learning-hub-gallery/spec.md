@@ -6,13 +6,14 @@
 
 **Status**: Draft
 
-**Input**: User description: "Combine training, workshops, and courses into a Learning Hub using the existing course structure; add a gallery of real admin-posted images of events and courses; rename Research & Development to R and D; replace the public sign-in button with an admin symbol that explains how to sign in as admin on hover."
+**Input**: User description: "Combine training, workshops, and courses into a Learning Hub using the existing course structure; add a gallery of real admin-posted images of events and courses using Google Drive URLs entered by admins; rename Research & Development to R and D; replace the public sign-in button with an admin symbol that explains how to sign in as admin on hover."
 
 ## Clarifications
 
 ### Session 2026-10-17
 
 - Q: Should administrators manage courses, training, and workshops through one unified course-style workflow, replacing the separate training and workshop management pages? → A: Replace separate training and workshop management with one unified course-style workflow.
+- Q: How should admins add gallery images? → A: Enter a publicly viewable Google Drive image URL; the app stores and renders the URL and does not upload, store, or delete image files.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -58,7 +59,8 @@ images and their descriptions are displayed accessibly.
    Gallery, **Then** they can view those images with their event or course context.
 2. **Given** an image cannot be loaded, **When** the gallery renders, **Then** the
    visitor receives a usable fallback and the rest of the gallery remains available.
-3. **Given** no images have been posted, **When** a visitor opens Gallery, **Then** a
+3. **Given** a Google Drive image is not publicly accessible or cannot be loaded, **When** the gallery renders, **Then** a usable unavailable-image fallback is shown and the rest of the gallery remains available.
+4. **Given** no images have been posted, **When** a visitor opens Gallery, **Then** a
    clear empty state is shown instead of a broken or blank page.
 
 ---
@@ -97,8 +99,9 @@ keyboard, and touch.
   in the course-style format.
 - No gallery images have been posted, or an individual image is unavailable; the page
   must remain usable and communicate the empty or unavailable state.
-- Uploaded images lack alternative text or context; the administrator must be prompted
-  for the information needed to make gallery items understandable.
+- A Drive link is private, invalid, or does not identify an image; it must be rejected
+  or shown with an unavailable-image fallback without disrupting other gallery items.
+- Removing a gallery entry must not delete or modify the image in Google Drive.
 - A non-admin attempts to add or remove gallery content; access must be denied.
 - The admin-sign-in hint is viewed on a touch device where hover is unavailable; the
   control must remain identifiable and operable.
@@ -114,9 +117,12 @@ keyboard, and touch.
   presented to visitors.
 - **FR-003**: The public site MUST provide a Gallery destination displaying real images
   posted by an administrator, with context identifying the associated event or course.
-- **FR-004**: Administrators MUST be able to add gallery images with descriptive
-  alternative text and event/course context, and remove images that should no longer
-  appear.
+- **FR-004**: Administrators MUST be able to add gallery entries by providing a publicly
+  viewable Google Drive image URL, descriptive alternative text, and event/course
+  context, and remove entries that should no longer appear.
+- **FR-013**: Gallery management MUST store and render the administrator-provided Google
+  Drive URL; it MUST NOT upload image files, integrate with separate image storage, or
+  delete or modify files in Google Drive.
 - **FR-005**: Gallery content MUST be available to public visitors, while adding or
   removing gallery content MUST be restricted to authorized administrators.
 - **FR-006**: The Gallery MUST present clear loading, empty, and image-unavailable states;
@@ -156,7 +162,8 @@ keyboard, and touch.
 - **SC-003**: 100% of published gallery images have meaningful alternative text and
   event/course context.
 - **SC-004**: 100% of gallery content-management attempts by unauthorized users are
-  denied, while authorized administrators can add and remove images.
+  denied, while authorized administrators can add and remove URL metadata without
+  changing files in Google Drive.
 - **SC-005**: Visitors can identify and operate the admin sign-in control using pointer,
   keyboard, and touch input without a general public sign-in button being displayed.
 
@@ -168,8 +175,12 @@ keyboard, and touch.
 - The Learning Hub uses one course-style management workflow for all learning offerings;
   existing training and workshop offerings are retained by adapting their information to
   that shared structure.
-- Gallery images are published for public viewing when an authorized administrator adds
-  them; a separate approval workflow is not required.
+- Gallery entries are published for public viewing when an authorized administrator
+  adds them. Administrators provide Google Drive links with access enabled for anyone
+  with the link; a separate approval workflow is not required.
+- Gallery URLs are validated and converted to an embeddable Google Drive image URL for
+  display. The application does not fetch remote URLs server-side, upload image files,
+  require storage-service credentials, or mutate files in Drive.
 - Gallery items are associated with an event or course and include descriptive
   alternative text. Optional filtering and advanced gallery organization are not required
   unless needed to present the content clearly.

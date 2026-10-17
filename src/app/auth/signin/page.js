@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { signIn, getSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,9 +9,6 @@ import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import {
   Dialog,
@@ -25,8 +22,6 @@ import {
   Lock,
   Eye,
   EyeOff,
-  // Github,
-  Chrome,
   User,
   Shield,
   ArrowRight,
@@ -41,8 +36,6 @@ function SignInForm() {
   const [password, setPassword] = useState("");
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  // const [isGithubLoading, setIsGithubLoading] = useState(false);
   const [isValid, setIsValid] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -63,8 +56,8 @@ function SignInForm() {
 
     if (!password) {
       newErrors.password = "Password is required";
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+    } else if (password.length < 12) {
+      newErrors.password = "Password must be at least 12 characters";
     }
 
     setErrors(newErrors);
@@ -107,28 +100,6 @@ function SignInForm() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setIsGoogleLoading(true);
-    try {
-      await signIn("google", { callbackUrl });
-    } catch (error) {
-      toast.error("Google sign-in failed. Please try again.");
-    } finally {
-      setIsGoogleLoading(false);
-    }
-  };
-
-  // const handleGithubSignIn = async () => {
-  //   setIsGithubLoading(true);
-  //   try {
-  //     await signIn("github", { callbackUrl });
-  //   } catch (error) {
-  //     toast.error("GitHub sign-in failed. Please try again.");
-  //   } finally {
-  //     setIsGithubLoading(false);
-  //   }
-  // };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navigation />
@@ -150,42 +121,6 @@ function SignInForm() {
 
           <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
             <CardContent className="p-8">
-              {/* Social Sign-in Buttons */}
-              <div className="space-y-3 mb-6">
-                <Button
-                  variant="outline"
-                  className="w-full h-12 font-medium"
-                  onClick={handleGoogleSignIn}
-                  disabled={isGoogleLoading || isLoading}
-                >
-                  <Chrome className="w-5 h-5 mr-2" />
-                  {isGoogleLoading ? "Signing in..." : "Continue with Google"}
-                </Button>
-
-                {/* GitHub sign-in button - uncomment when GitHub OAuth is configured */}
-                {/* <Button
-                      variant="outline"
-                      className="w-full h-12 font-medium"
-                      onClick={handleGithubSignIn}
-                        disabled={isGoogleLoading || isLoading}
-                    >
-                      <Github className="w-5 h-5 mr-2" />
-                      {isGithubLoading ? "Signing in..." : "Continue with GitHub"}
-                    </Button> */}
-              </div>
-
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-muted-foreground">
-                    or continue with email
-                  </span>
-                </div>
-              </div>
-
-              {/* Email/Password Form */}
               <form onSubmit={handleCredentialsSignIn} className="space-y-4">
                 {errors.general && (
                   <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -206,7 +141,7 @@ function SignInForm() {
                         setErrors((prev) => ({ ...prev, email: null }));
                       }
                     }}
-                    disabled={isGoogleLoading || isLoading}
+                    disabled={isLoading}
                     className="h-12"
                   />
                   {errors.email && (
@@ -228,7 +163,7 @@ function SignInForm() {
                           setErrors((prev) => ({ ...prev, password: null }));
                         }
                       }}
-                      disabled={isGoogleLoading || isLoading}
+                      disabled={isLoading}
                       className="h-12 pr-10"
                     />
                     <button
@@ -248,19 +183,10 @@ function SignInForm() {
                   )}
                 </div>
 
-                <div className="flex justify-end">
-                  <a
-                    href="/auth/forgot-password"
-                    className="text-sm text-blue-600 hover:text-blue-800"
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
-
                 <Button
                   type="submit"
                   className="w-full h-12 font-medium text-lg"
-                  disabled={isGoogleLoading || isLoading}
+                  disabled={isLoading}
                 >
                   {isLoading ? (
                     "Signing In..."
@@ -273,18 +199,6 @@ function SignInForm() {
                 </Button>
               </form>
 
-              {/* Additional Links */}
-              <div className="text-center mt-6 pt-6 border-t border-gray-200">
-                <p className="text-sm text-gray-600">
-                  Don&apos;t have an account?{" "}
-                  <a
-                    href="/auth/signup"
-                    className="text-blue-600 hover:text-blue-800 font-medium"
-                  >
-                    Create one now
-                  </a>
-                </p>
-              </div>
             </CardContent>
           </Card>
 

@@ -1,8 +1,8 @@
 # Learning Hub and Gallery API Contracts
 
-All endpoints return JSON except multipart upload requests. Management endpoints require
-a valid authenticated session whose user role is `admin`; failed authorization returns
-HTTP 401 or 403 and performs no write.
+All endpoints return JSON. Management endpoints require a valid authenticated session
+whose user role is `admin`; failed authorization returns HTTP 401 or 403 and performs no
+write.
 
 ## Learning offerings
 
@@ -57,20 +57,17 @@ an empty `images` list with HTTP 200.
 
 ### `POST /api/gallery`
 
-Admin only. Multipart form with `file`, `altText`, `caption`, and `category` (`event` or
-`course`). Server validates authorization, file type/size, and required metadata, uploads
-to Tigris, then persists the GalleryImage record.
+Admin only. JSON body with `url`, `altText`, `caption`, and `category` (`event` or
+`course`). `url` must be an HTTPS `drive.google.com` share/file URL containing a
+recognizable file ID. The linked image must be viewable by anyone with the link.
 
-Success: HTTP 201 with `{ image }`. Unauthorized: HTTP 401/403. Invalid file or metadata:
-HTTP 400. Storage or persistence failure: explicit HTTP 5xx error; never return a success
-response for an unpublished image. If metadata persistence fails after upload, attempt to
-remove the uploaded object and log/report cleanup failure.
+Success: HTTP 201 with `{ image }`. Unauthorized: HTTP 401/403. Invalid URL or metadata:
+HTTP 400. The server validates URL structure only and does not fetch the remote resource.
+There is no multipart upload or image-storage operation.
 
 ### `DELETE /api/gallery/{id}`
 
-Admin only. First marks the record inactive so it is no longer public, then removes the
-image object from Tigris and deletes the metadata record.
+Admin only. Deletes the GalleryImage metadata record. The image in Google Drive is not
+deleted or modified.
 
-Success: HTTP 200. Unauthorized: HTTP 401/403. Unknown id: HTTP 404. Storage failure:
-explicit HTTP 5xx error; preserve the inactive metadata record so an administrator can
-retry deletion without leaving the image publicly listed.
+Success: HTTP 200. Unauthorized: HTTP 401/403. Unknown id: HTTP 404.
