@@ -5,6 +5,14 @@ import Image from "next/image";
 import { GridPattern } from "@/components/ui/grid-pattern";
 import { MagicCard } from "@/components/ui/magic-card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -117,36 +125,71 @@ export default function GalleryPage() {
                 {images.map((image) => (
                   <MagicCard
                     key={image._id}
-                    className="h-full border border-gray-200/50 bg-white/80 p-0 backdrop-blur-sm"
+                    className="border border-gray-200/50 bg-white/80 p-0 backdrop-blur-sm"
                     gradientColor="rgba(59, 130, 246, 0.1)"
                   >
-                    <figure className="flex h-full flex-col overflow-hidden rounded-[inherit]">
-                      <div className="relative aspect-[4/3] w-full bg-gray-100">
-                        {failedImages.has(image._id) || !image.displayUrl ? (
-                          <div
-                            className="flex h-full items-center justify-center px-6 text-center text-sm text-gray-600"
-                            role="img"
-                            aria-label={`${image.altText} (image unavailable)`}
+                    <figure className="overflow-hidden rounded-[inherit]">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button
+                            type="button"
+                            aria-label={`View image: ${image.altText}`}
+                            className="block w-full rounded-t-[inherit] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
                           >
-                            This image is currently unavailable.
+                            <div className="relative aspect-[4/3] w-full bg-gray-100">
+                              {failedImages.has(image._id) || !image.displayUrl ? (
+                                <div
+                                  className="flex h-full items-center justify-center px-6 text-center text-sm text-gray-600"
+                                  role="img"
+                                  aria-label={`${image.altText} (image unavailable)`}
+                                >
+                                  This image is currently unavailable.
+                                </div>
+                              ) : (
+                                <Image
+                                  src={image.displayUrl}
+                                  alt={image.altText}
+                                  fill
+                                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                                  unoptimized
+                                  className="object-contain"
+                                  onError={() => markUnavailable(image._id)}
+                                />
+                              )}
+                            </div>
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent className="max-h-[95dvh] w-[calc(100vw-1rem)] max-w-6xl overflow-y-auto p-4 sm:p-6">
+                          <DialogHeader className="pr-8">
+                            <DialogTitle>{image.altText}</DialogTitle>
+                            <DialogDescription>
+                              {image.category}: {image.caption}
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="relative flex h-[min(72dvh,48rem)] min-h-48 w-full items-center justify-center rounded-lg bg-slate-950">
+                            {failedImages.has(image._id) || !image.displayUrl ? (
+                              <p role="status" className="px-6 text-center text-white">
+                                This image is currently unavailable.
+                              </p>
+                            ) : (
+                              <Image
+                                src={image.displayUrl}
+                                alt={image.altText}
+                                fill
+                                sizes="96vw"
+                                unoptimized
+                                className="object-contain"
+                                onError={() => markUnavailable(image._id)}
+                              />
+                            )}
                           </div>
-                        ) : (
-                          <Image
-                            src={image.displayUrl}
-                            alt={image.altText}
-                            fill
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                            unoptimized
-                            className="object-cover"
-                            onError={() => markUnavailable(image._id)}
-                          />
-                        )}
-                      </div>
-                      <figcaption className="flex flex-1 flex-col p-5">
+                        </DialogContent>
+                      </Dialog>
+                      <figcaption className="p-5">
                         <Badge variant="secondary" className="w-fit capitalize">
                           {image.category}
                         </Badge>
-                        <p className="mt-3 flex-1 leading-6 text-gray-700">
+                        <p className="mt-3 leading-6 text-gray-700">
                           {image.caption}
                         </p>
                       </figcaption>

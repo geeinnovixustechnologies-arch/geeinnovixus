@@ -110,7 +110,7 @@ export default function ResearchPage() {
     return (
       <div className="flex flex-wrap gap-1">
         {services.slice(0, 3).map((service) => (
-          <Badge key={service} variant="secondary" className="text-xs">
+          <Badge key={service} variant="secondary" className="max-w-full whitespace-normal break-words text-xs">
             {service}
           </Badge>
         ))}
@@ -267,31 +267,31 @@ export default function ResearchPage() {
       {/* Research Services Grid */}
       <section className="py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
             {filteredResearch.map((item) => {
               const Icon =
                 researchIcons[item.icon?.trim().toLowerCase()] || Lightbulb;
               return (
                 <MagicCard
                     key={item._id}
-                    className="h-full p-6 bg-white/80 backdrop-blur-sm border border-gray-200/50"
+                    className="h-fit border border-gray-200/50 bg-white/80 p-6 backdrop-blur-sm"
                     gradientColor="rgba(59, 130, 246, 0.1)"
                     borderColor="rgba(59, 130, 246, 0.2)"
                     spotlightColor="rgba(59, 130, 246, 0.1)"
                   >
-                <div className="flex items-center justify-between w-full mb-4">
-                  <div className="flex items-center space-x-3">
+                <div className="mb-4 flex w-full items-start justify-between gap-2">
+                  <div className="flex min-w-0 items-start space-x-3">
                     <Icon aria-hidden="true" className="h-8 w-8 text-blue-600" />
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
+                    <div className="min-w-0">
+                      <h3 className="break-words text-lg font-semibold text-gray-900">
                         {item.title}
                       </h3>
-                      <Badge variant="secondary" className="mt-1">
+                      <Badge variant="secondary" className="mt-1 max-w-full whitespace-normal break-words">
                         {item.category}
                       </Badge>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-1">
+                  <div className="flex shrink-0 items-center space-x-1">
                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                     <span className="text-sm font-medium text-gray-700">
                       {item.rating}
@@ -299,7 +299,7 @@ export default function ResearchPage() {
                   </div>
                 </div>
 
-                <p className="text-gray-600 mb-4 text-sm">{item.description}</p>
+                <p className="mb-4 break-words text-sm text-gray-600">{item.description}</p>
 
                 <div className="space-y-3 mb-4">
                   <div className="flex items-center space-x-2">
@@ -323,7 +323,7 @@ export default function ResearchPage() {
                   </h4>
                   <div className="flex flex-wrap gap-1">
                     {(item.features || []).slice(0, 3).map((feature, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
+                      <Badge key={index} variant="outline" className="max-w-full whitespace-normal break-words text-xs">
                         {feature}
                       </Badge>
                     ))}

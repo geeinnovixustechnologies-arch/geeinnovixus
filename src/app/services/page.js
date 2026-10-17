@@ -265,34 +265,37 @@ export default function ServicesPage() {
       {/* Services Grid */}
       <section className="py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
             {filteredServices.map((service) => {
               const Icon =
                 serviceIcons[service.icon?.trim().toLowerCase()] || Briefcase;
               return (
                 <MagicCard
                   key={service._id}
-                  className="h-full p-6 bg-white/80 backdrop-blur-sm border border-gray-200/50"
+                  className="h-fit min-w-0 border border-gray-200/50 bg-white/80 p-6 backdrop-blur-sm"
                   gradientColor="rgba(59, 130, 246, 0.1)"
                   borderColor="rgba(59, 130, 246, 0.2)"
                   spotlightColor="rgba(59, 130, 246, 0.1)"
                 >
-                  <div className="flex items-center justify-between w-full mb-4">
-                    <div className="flex items-center space-x-3">
+                  <div className="mb-4 flex w-full items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-start gap-3">
                       <Icon
                         aria-hidden="true"
-                        className="h-8 w-8 shrink-0 text-blue-600"
+                        className="mt-1 h-8 w-8 shrink-0 text-blue-600"
                       />
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900">
+                      <div className="min-w-0">
+                        <h3 className="break-words text-lg font-semibold text-gray-900">
                           {service.name}
                         </h3>
-                        <Badge variant="secondary" className="mt-1">
+                        <Badge
+                          variant="secondary"
+                          className="mt-1 max-w-full whitespace-normal break-words"
+                        >
                           {service.category}
                         </Badge>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-1">
+                    <div className="flex shrink-0 items-center space-x-1">
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                       <span className="text-sm font-medium text-gray-700">
                         {service.rating?.average ?? 0}
@@ -300,13 +303,13 @@ export default function ServicesPage() {
                     </div>
                   </div>
 
-                  <p className="text-gray-600 mb-4 text-sm">
+                  <p className="mb-4 break-words text-sm text-gray-600">
                     {service.description}
                   </p>
 
                   <div className="space-y-3 mb-4">
                     <div className="flex items-center space-x-2">
-                      <Tag className="w-4 h-4 text-blue-600" />
+                      <Tag aria-hidden="true" className="h-4 w-4 shrink-0 text-blue-600" />
                       <span className="text-sm text-gray-600 font-medium">
                         Domains:
                       </span>
@@ -314,8 +317,8 @@ export default function ServicesPage() {
                     {formatDomains(service.tags || service.features)}
 
                     <div className="flex items-center space-x-2">
-                      <Clock className="w-4 h-4 text-blue-600" />
-                      <span className="text-sm text-gray-600">
+                      <Clock aria-hidden="true" className="h-4 w-4 shrink-0 text-blue-600" />
+                      <span className="break-words text-sm text-gray-600">
                         Delivery: {service.deliveryTime}
                       </span>
                     </div>
@@ -332,7 +335,7 @@ export default function ServicesPage() {
                           <Badge
                             key={index}
                             variant="outline"
-                            className="text-xs"
+                            className="max-w-full whitespace-normal break-words text-xs"
                           >
                             {feature}
                           </Badge>

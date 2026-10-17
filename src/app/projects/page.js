@@ -450,16 +450,17 @@ export default function ProjectsPage() {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+                <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
                   {filteredProjects.map((project, index) => (
                     <motion.div
                       key={project._id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
+                      className="h-fit"
                     >
                       <MagicCard
-                        className="h-full p-6 bg-white/80 backdrop-blur-sm border border-gray-200/50"
+                        className="h-fit border border-gray-200/50 bg-white/80 p-6 backdrop-blur-sm"
                         gradientColor="rgba(59, 130, 246, 0.1)"
                         borderColor="rgba(59, 130, 246, 0.2)"
                         spotlightColor="rgba(59, 130, 246, 0.1)"
@@ -507,11 +508,11 @@ export default function ProjectsPage() {
 
                         {/* Project Content */}
                         <div className="space-y-4">
-                          <div className="flex items-center justify-between mb-1">
-                            <Badge variant="secondary">
+                          <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+                            <Badge variant="secondary" className="max-w-full whitespace-normal break-words">
                               {project.category}
                             </Badge>
-                            <div className="flex items-center">
+                            <div className="flex shrink-0 items-center">
                               <Star className="h-4 w-4 text-yellow-400 fill-current" />
                               <span className="ml-1 text-sm text-gray-600">
                                 {project.rating.average} ({project.rating.count}
@@ -520,11 +521,11 @@ export default function ProjectsPage() {
                             </div>
                           </div>
 
-                          <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                          <h3 className="mb-1 break-words text-lg font-semibold text-gray-900">
                             {project.title}
                           </h3>
 
-                          <p className="text-gray-600 mb-2 line-clamp-2 text-sm">
+                          <p className="mb-2 break-words text-sm text-gray-600">
                             {project.shortDescription}
                           </p>
 
@@ -534,7 +535,7 @@ export default function ProjectsPage() {
                               <Badge
                                 key={tech}
                                 variant="outline"
-                                className="text-xs"
+                                className="max-w-full whitespace-normal break-words text-xs"
                               >
                                 {tech}
                               </Badge>

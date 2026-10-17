@@ -3,7 +3,10 @@ import { getServerSession } from "next-auth";
 import connectDB from "@/lib/mongodb.js";
 import { authOptions } from "@/lib/auth.js";
 import GalleryImage from "@/models/GalleryImage.js";
-import { getGoogleDriveImageUrl } from "@/lib/google-drive-image-url.js";
+import {
+  getGoogleDriveImageProxyUrl,
+  getGoogleDriveImageUrl,
+} from "@/lib/google-drive-image-url.js";
 
 const MAX_LIMIT = 100;
 
@@ -40,7 +43,7 @@ export async function GET(request) {
       {
         images: images.map((image) => ({
           ...image,
-          displayUrl: getGoogleDriveImageUrl(image.url),
+          displayUrl: getGoogleDriveImageProxyUrl(image.url),
         })),
         total,
         page,
@@ -114,7 +117,7 @@ export async function POST(request) {
     });
     const publicImage = image.toObject();
     delete publicImage.postedBy;
-    publicImage.displayUrl = getGoogleDriveImageUrl(publicImage.url);
+    publicImage.displayUrl = getGoogleDriveImageProxyUrl(publicImage.url);
     return NextResponse.json({ image: publicImage }, { status: 201 });
   } catch (error) {
     console.error("Error creating gallery entry:", error);

@@ -4,7 +4,10 @@ import { getServerSession } from "next-auth";
 import connectDB from "@/lib/mongodb.js";
 import { authOptions } from "@/lib/auth.js";
 import GalleryImage from "@/models/GalleryImage.js";
-import { getGoogleDriveImageUrl } from "@/lib/google-drive-image-url.js";
+import {
+  getGoogleDriveImageProxyUrl,
+  getGoogleDriveImageUrl,
+} from "@/lib/google-drive-image-url.js";
 
 export async function PATCH(request, { params }) {
   try {
@@ -64,7 +67,7 @@ export async function PATCH(request, { params }) {
       return NextResponse.json({ message: "Gallery image not found" }, { status: 404 });
     }
     const result = image.toObject();
-    result.displayUrl = getGoogleDriveImageUrl(result.url);
+    result.displayUrl = getGoogleDriveImageProxyUrl(result.url);
     return NextResponse.json({ image: result });
   } catch (error) {
     console.error("Error updating gallery image:", error);
