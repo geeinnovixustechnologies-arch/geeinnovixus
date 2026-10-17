@@ -53,8 +53,6 @@ export default function AdminCertificatePage() {
   const [activeTab, setActiveTab] = useState("generate");
 
   const loadCertificates = useCallback(async (requestedPage = 1) => {
-    setListLoading(true);
-    setListError("");
     try {
       const query = new URLSearchParams({ page: String(requestedPage) });
       Object.entries(filters).forEach(([key, value]) => {
@@ -63,6 +61,7 @@ export default function AdminCertificatePage() {
       const response = await fetch(`/api/certificates?${query}`, { cache: "no-store" });
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || "Could not load certificates.");
+      setListError("");
       setCertificates(result.certificates || []);
       setPage(result.page || requestedPage);
       setTotal(result.total || 0);
@@ -75,10 +74,39 @@ export default function AdminCertificatePage() {
   }, [filters]);
 
   useEffect(() => {
-    if (status === "authenticated" && session?.user?.role === "admin") {
-      loadCertificates(page);
-    }
-  }, [status, session?.user?.role, page, loadCertificates]);
+    if (status !== "authenticated" || session?.user?.role !== "admin") return;
+
+    let cancelled = false;
+    const query = new URLSearchParams({ page: String(page) });
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value.trim()) query.set(key, value.trim());
+    });
+
+    fetch(`/api/certificates?${query}`, { cache: "no-store" })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || "Could not load certificates.");
+        return result;
+      })
+      .then((result) => {
+        if (cancelled) return;
+        setListError("");
+        setCertificates(result.certificates || []);
+        setPage(result.page || page);
+        setTotal(result.total || 0);
+        setTotalPages(result.totalPages || 1);
+      })
+      .catch((loadError) => {
+        if (!cancelled) setListError(loadError.message);
+      })
+      .finally(() => {
+        if (!cancelled) setListLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [status, session?.user?.role, page, filters]);
 
   function beginEdit(item) {
     setActiveTab("generate");
@@ -124,6 +152,8 @@ export default function AdminCertificatePage() {
       setCertificate(result.certificate);
       setEditingId("");
       setDetails(EMPTY_DETAILS);
+      setListLoading(true);
+      setListError("");
       if (page === 1) await loadCertificates(1);
       else setPage(1);
     } catch (submissionError) {
@@ -285,7 +315,7 @@ export default function AdminCertificatePage() {
               <h2 id="issued-certificates-heading" className="text-2xl font-bold text-slate-950">Generated certificates</h2>
               <p className="mt-1 text-sm text-slate-600">Edit details and regenerate a PDF if a certificate needs correction.</p>
             </div>
-            <Button type="button" variant="outline" onClick={() => loadCertificates(page)} disabled={listLoading}>
+            <Button type="button" variant="outline" onClick={() => { setListLoading(true); setListError(""); loadCertificates(page); }} disabled={listLoading}>
               {listLoading ? "Refreshing…" : "Refresh list"}
             </Button>
           </div>
@@ -293,6 +323,8 @@ export default function AdminCertificatePage() {
             className="mb-5 grid grid-cols-1 gap-3 rounded-xl border bg-white p-4 shadow-sm md:grid-cols-[minmax(220px,2fr)_minmax(150px,1fr)_minmax(150px,1fr)_auto_auto] md:items-end"
             onSubmit={(event) => {
               event.preventDefault();
+              setListLoading(true);
+              setListError("");
               setPage(1);
               setFilters({ ...filterDraft });
             }}
@@ -321,6 +353,8 @@ export default function AdminCertificatePage() {
               variant="outline"
               disabled={listLoading && certificates.length === 0}
               onClick={() => {
+                setListLoading(true);
+                setListError("");
                 setFilterDraft(EMPTY_FILTERS);
                 setFilters(EMPTY_FILTERS);
                 setPage(1);
@@ -367,9 +401,9 @@ export default function AdminCertificatePage() {
               <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-slate-600">Showing {(page - 1) * 20 + 1}–{Math.min(page * 20, total)} of {total} certificates</p>
                 <div className="flex items-center gap-2">
-                  <Button type="button" variant="outline" disabled={page <= 1 || listLoading} onClick={() => setPage(page - 1)}>Previous</Button>
+                  <Button type="button" variant="outline" disabled={page <= 1 || listLoading} onClick={() => { setListLoading(true); setPage(page - 1); }}>Previous</Button>
                   <span className="min-w-24 text-center text-sm text-slate-600">Page {page} of {totalPages}</span>
-                  <Button type="button" variant="outline" disabled={page >= totalPages || listLoading} onClick={() => setPage(page + 1)}>Next</Button>
+                  <Button type="button" variant="outline" disabled={page >= totalPages || listLoading} onClick={() => { setListLoading(true); setPage(page + 1); }}>Next</Button>
                 </div>
               </div>
             </>
