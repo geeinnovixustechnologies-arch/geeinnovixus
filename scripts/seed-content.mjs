@@ -23,7 +23,7 @@ function readLocalMongoUri() {
   return assignment[1].replace(/^(['"])(.*)\1$/, "$2");
 }
 
-function assertDevelopmentUri(value) {
+function validateMongoUri(value, allowRemote) {
   let uri;
   try {
     uri = new URL(value);
@@ -33,23 +33,35 @@ function assertDevelopmentUri(value) {
 
   const isLoopback = ["127.0.0.1", "localhost", "[::1]"].includes(uri.hostname);
   const databaseName = decodeURIComponent(uri.pathname.slice(1));
-  if (
-    uri.protocol !== "mongodb:" ||
-    !isLoopback ||
-    uri.username ||
-    uri.password ||
-    databaseName !== "geeinnovixus_dev"
-  ) {
+  if (!["mongodb:", "mongodb+srv:"].includes(uri.protocol) || !databaseName) {
+    throw new Error("MONGODB_URI must be a valid MongoDB URI with a database name.");
+  }
+
+  if (!allowRemote && (uri.protocol !== "mongodb:" || !isLoopback || uri.username || uri.password || databaseName !== "geeinnovixus_dev")) {
     throw new Error(
       "Seed blocked: MONGODB_URI must target the local geeinnovixus_dev database without credentials."
     );
   }
 
+  if (allowRemote && isLoopback) {
+    throw new Error("--allow-remote requires a non-local MongoDB URI.");
+  }
+
   return value;
 }
 
-const mongoUri = assertDevelopmentUri(readLocalMongoUri());
+const args = process.argv.slice(2);
+const allowRemote = args.includes("--allow-remote");
+if (args.some((arg) => arg !== "--allow-remote")) {
+  throw new Error("Usage: node scripts/seed-content.mjs [--allow-remote]");
+}
+
+const mongoUri = validateMongoUri(readLocalMongoUri(), allowRemote);
 process.env.MONGODB_URI = mongoUri;
+if (allowRemote) {
+  const databaseName = decodeURIComponent(new URL(mongoUri).pathname.slice(1));
+  console.warn(`Remote seeding enabled for database "${databaseName}". Verify the target before continuing.`);
+}
 
 const [
   { default: connectDB },
@@ -101,6 +113,51 @@ const sampleData = {
       color: "success",
       isActive: true,
     },
+    {
+      title: "Research Publication Support",
+      description:
+        "Structured support for literature reviews, research design, data interpretation, and preparing a clear manuscript for journal or conference submission.",
+      category: "Research Publication",
+      domain: "Multidisciplinary Research",
+      services: ["Literature review", "Research methodology", "Manuscript preparation"],
+      features: ["Citation and structure review", "Journal-ready formatting", "Revision guidance"],
+      deliveryTime: "2-4 weeks",
+      popularity: 82,
+      rating: 4.8,
+      icon: "book-open",
+      color: "info",
+      isActive: true,
+    },
+    {
+      title: "AI and Data Science Research",
+      description:
+        "Practical research support for data preparation, model selection, evaluation, and reproducible reporting in AI and data science projects.",
+      category: "Applied Research",
+      domain: "Artificial Intelligence",
+      services: ["Dataset review", "Model evaluation", "Statistical analysis"],
+      features: ["Reproducible notebooks", "Transparent evaluation", "Readable technical reports"],
+      deliveryTime: "3-6 weeks",
+      popularity: 79,
+      rating: 4.7,
+      icon: "brain",
+      color: "primary",
+      isActive: true,
+    },
+    {
+      title: "Prototype and Product Development",
+      description:
+        "Early-stage technical guidance to turn a defined engineering or software concept into a scoped, testable prototype plan.",
+      category: "Product Development",
+      domain: "Engineering Design",
+      services: ["Requirements review", "Prototype planning", "Design iteration"],
+      features: ["Milestone-based scope", "Design review", "Prototype documentation"],
+      deliveryTime: "2-8 weeks",
+      popularity: 73,
+      rating: 4.6,
+      icon: "lightbulb",
+      color: "success",
+      isActive: true,
+    },
   ],
   projects: [
     {
@@ -141,6 +198,42 @@ const sampleData = {
       isFeatured: false,
       tags: ["machine-learning", "classification", "python"],
     },
+    {
+      title: "Computer Vision Quality Inspection",
+      description:
+        "A demonstration project that uses an image dataset to classify common product defects and summarizes model performance for review.",
+      shortDescription: "Explore an image classification workflow for quality inspection.",
+      category: "AI/ML",
+      domain: ["Artificial Intelligence", "Computer Vision", "Machine Learning"],
+      technologies: ["Python", "OpenCV", "PyTorch", "Jupyter"],
+      pricing: { basePrice: 350, currency: "USD", isOnSale: false },
+      features: ["Dataset preparation", "Model evaluation", "Documented inference workflow"],
+      difficulty: "advanced",
+      estimatedTime: "5-7 weeks",
+      requirements: ["Python fundamentals", "Sample image dataset"],
+      deliverables: ["Source code", "Reproducible notebook", "Technical report"],
+      isActive: true,
+      isFeatured: true,
+      tags: ["computer-vision", "quality-inspection", "python"],
+    },
+    {
+      title: "Secure Research Data Portal",
+      description:
+        "A starter web application concept for organizing research datasets with role-aware access, metadata, and a searchable catalog.",
+      shortDescription: "Organize research datasets in a searchable, access-aware portal.",
+      category: "Web Development",
+      domain: ["Full Stack", "Backend", "Frontend"],
+      technologies: ["Next.js", "Node.js", "MongoDB"],
+      pricing: { basePrice: 400, currency: "USD", isOnSale: false },
+      features: ["Dataset catalog", "Role-aware access concept", "Responsive interface"],
+      difficulty: "intermediate",
+      estimatedTime: "4-6 weeks",
+      requirements: ["Project brief", "Sample metadata fields"],
+      deliverables: ["Source code", "Setup guide", "Project documentation"],
+      isActive: true,
+      isFeatured: false,
+      tags: ["research", "web-app", "data-management"],
+    },
   ],
   services: [
     {
@@ -176,6 +269,70 @@ const sampleData = {
       isActive: true,
       isPopular: false,
       tags: ["engineering", "consulting", "project"],
+    },
+    {
+      name: "Patent Search and Drafting Support",
+      description:
+        "Early-stage support for organizing an invention disclosure, reviewing search results, and preparing materials for discussion with a qualified patent professional.",
+      shortDescription: "Organize invention details and prepare for a professional IP review.",
+      category: "Consulting",
+      subcategory: "Intellectual Property",
+      pricing: { startingPrice: 200, currency: "USD", pricingModel: "per_project", customPricing: true },
+      features: ["Invention disclosure checklist", "Prior-art search summary", "Drafting coordination"],
+      deliveryTime: "2-4 weeks",
+      requirements: ["Invention summary", "Relevant drawings or background materials"],
+      deliverables: ["Organized disclosure document", "Search summary", "Next-step checklist"],
+      isActive: true,
+      isPopular: false,
+      tags: ["patent", "intellectual-property", "research"],
+    },
+    {
+      name: "Academic Similarity and Citation Review",
+      description:
+        "A pre-submission review of citation consistency, quotation practices, and text similarity indicators to help authors identify passages that need attention.",
+      shortDescription: "Review citations and similarity flags before academic submission.",
+      category: "Research Publication",
+      subcategory: "Quality Assurance",
+      pricing: { startingPrice: 40, currency: "USD", pricingModel: "per_project" },
+      features: ["Citation consistency review", "Similarity report interpretation", "Actionable revision notes"],
+      deliveryTime: "1-3 business days",
+      requirements: ["Editable manuscript", "Required citation style"],
+      deliverables: ["Review notes", "Citation checklist"],
+      isActive: true,
+      isPopular: true,
+      tags: ["academic-writing", "citations", "quality-review"],
+    },
+    {
+      name: "Manuscript Structure and Editing",
+      description:
+        "Editorial support to improve the organization, clarity, and consistency of a research manuscript while preserving the authors' technical meaning.",
+      shortDescription: "Improve manuscript structure, readability, and submission readiness.",
+      category: "Research Publication",
+      subcategory: "Writing and Editing",
+      pricing: { startingPrice: 120, currency: "USD", pricingModel: "per_project", customPricing: true },
+      features: ["Section structure review", "Language and clarity edits", "Formatting checklist"],
+      deliveryTime: "1-3 weeks",
+      requirements: ["Complete draft", "Target journal or conference guidelines"],
+      deliverables: ["Edited draft", "Revision notes", "Submission checklist"],
+      isActive: true,
+      isPopular: true,
+      tags: ["manuscript", "editing", "publication"],
+    },
+    {
+      name: "Engineering Prototype Planning",
+      description:
+        "A scoped planning service for engineering prototypes, covering requirements, material or software choices, test criteria, and staged milestones.",
+      shortDescription: "Turn an early engineering idea into a practical prototype plan.",
+      category: "Academic Projects",
+      subcategory: "Prototyping",
+      pricing: { startingPrice: 180, currency: "USD", pricingModel: "per_project", customPricing: true },
+      features: ["Requirements breakdown", "Prototype milestone plan", "Test and documentation outline"],
+      deliveryTime: "2-4 weeks",
+      requirements: ["Project brief", "Constraints and intended use"],
+      deliverables: ["Prototype plan", "Milestone checklist", "Design review notes"],
+      isActive: true,
+      isPopular: false,
+      tags: ["engineering", "prototype", "design"],
     },
   ],
 };
@@ -228,20 +385,28 @@ async function validateSeedData() {
 }
 
 async function seedCollection(Model, records, collectionName, extra = () => ({})) {
-  const existingCount = await Model.countDocuments();
-  if (existingCount > 0) {
-    console.log(`${collectionName}: skipped; already contains ${existingCount} record(s).`);
-    return;
-  }
   if (records.length === 0) {
     console.log(`${collectionName}: skipped; provide public Google Drive URL(s) to seed Gallery.`);
     return;
   }
 
-  await Model.insertMany(records.map((record) => ({ ...record, ...extra() })), {
-    ordered: true,
-  });
-  console.log(`${collectionName}: inserted ${records.length} sample record(s).`);
+  let inserted = 0;
+  let present = 0;
+  for (const record of records) {
+    const identity = record.title
+      ? { title: record.title }
+      : record.name
+        ? { name: record.name }
+        : { url: record.url };
+    const result = await Model.updateOne(
+      identity,
+      { $setOnInsert: { ...record, ...extra() } },
+      { upsert: true, runValidators: true }
+    );
+    if (result.upsertedCount) inserted += 1;
+    else present += 1;
+  }
+  console.log(`${collectionName}: ${inserted} added, ${present} already present.`);
 }
 
 async function seed() {
@@ -259,7 +424,7 @@ async function seed() {
     () => ({ postedBy: admin._id })
   );
 
-  console.log("Local content seed complete.");
+  console.log("Local starter content seed complete. Review sample copy before publishing it.");
 }
 
 try {

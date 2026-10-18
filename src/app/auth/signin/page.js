@@ -56,8 +56,6 @@ function SignInForm() {
 
     if (!password) {
       newErrors.password = "Password is required";
-    } else if (password.length < 12) {
-      newErrors.password = "Password must be at least 12 characters";
     }
 
     setErrors(newErrors);

@@ -37,6 +37,19 @@ function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function getPublicSiteBaseUrl(request) {
+  if (process.env.VERCEL_URL) {
+    const deploymentUrl = new URL(`https://${process.env.VERCEL_URL}`);
+    return deploymentUrl.origin;
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("VERCEL_URL is required to build certificate verification links in production.");
+  }
+
+  return new URL(request.url).origin;
+}
+
 export async function POST(request) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ message: "Authentication required." }, { status: 401 });
@@ -65,7 +78,7 @@ export async function POST(request) {
     }
 
     phase = "calling the Google Apps Script deployment";
-    const siteBaseUrl = (process.env.NEXTAUTH_URL || new URL(request.url).origin).replace(/\/$/, "");
+    const siteBaseUrl = getPublicSiteBaseUrl(request);
     const verificationUrl = `${siteBaseUrl}/verify/${encodeURIComponent(body.certificateId.trim())}`;
     let response;
     try {
@@ -224,7 +237,7 @@ export async function PUT(request) {
     }
 
     phase = "regenerating the certificate through Google Apps Script";
-    const siteBaseUrl = (process.env.NEXTAUTH_URL || new URL(request.url).origin).replace(/\/$/, "");
+    const siteBaseUrl = getPublicSiteBaseUrl(request);
     const verificationUrl = `${siteBaseUrl}/verify/${encodeURIComponent(body.certificateId.trim())}`;
     const response = await fetch(process.env.CERTIFICATE_APPS_SCRIPT_URL, {
       method: "POST",
