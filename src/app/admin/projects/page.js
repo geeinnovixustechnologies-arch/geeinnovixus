@@ -249,12 +249,17 @@ export default function AdminProjectsPage() {
                 Manage all projects in the system
               </p>
             </div>
-            <Link href="/admin/projects/new">
-              <Button>
-                <Plus className="h-5 w-5 mr-2" />
-                Add New Project
-              </Button>
-            </Link>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link href="/projects" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-blue-700 hover:text-blue-900">
+                Preview public projects
+              </Link>
+              <Link href="/admin/projects/new">
+                <Button>
+                  <Plus className="h-5 w-5 mr-2" />
+                  Add New Project
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -496,7 +501,8 @@ export default function AdminProjectsPage() {
                         <Button variant="ghost" size="sm" asChild>
                           <Link
                             href={`/projects/${project._id}`}
-                            title="View Project"
+                            title="Preview as a visitor"
+                            aria-label={`Preview ${project.title} as a visitor`}
                           >
                             <Eye className="h-4 w-4" />
                           </Link>

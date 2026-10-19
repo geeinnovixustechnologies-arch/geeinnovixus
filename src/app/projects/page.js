@@ -12,8 +12,8 @@ import {
   Calendar,
   Tag,
   ArrowRight,
-  MessageCircle,
   Lightbulb,
+  MoreHorizontal,
 } from "lucide-react";
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
@@ -34,9 +34,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AnimatedGradientText } from "@/components/ui/animated-gradient-text";
-import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { GridPattern } from "@/components/ui/grid-pattern";
 import { MagicCard } from "@/components/ui/magic-card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
@@ -135,14 +141,14 @@ export default function ProjectsPage() {
     if (!domains || domains.length === 0) return null;
 
     return (
-      <div className="flex flex-wrap gap-1">
+      <div className="flex min-w-0 flex-nowrap gap-1 overflow-hidden">
         {domains.slice(0, 2).map((domain) => (
-          <Badge key={domain} variant="secondary" className="text-xs">
+          <Badge key={domain} variant="secondary" className="max-w-[46%] truncate whitespace-nowrap text-xs" title={domain} tabIndex={0} aria-label={domain}>
             {domain}
           </Badge>
         ))}
         {domains.length > 2 && (
-          <Badge variant="secondary" className="text-xs">
+          <Badge variant="secondary" className="shrink-0 whitespace-nowrap text-xs" title={domains.slice(2).join(", ")} tabIndex={0} aria-label={`More domains: ${domains.slice(2).join(", ")}`}>
             +{domains.length - 2} more
           </Badge>
         )}
@@ -450,7 +456,7 @@ export default function ProjectsPage() {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
+                <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-7 2xl:grid-cols-4">
                   {filteredProjects.map((project, index) => (
                     <motion.div
                       key={project._id}
@@ -460,13 +466,13 @@ export default function ProjectsPage() {
                       className="h-fit"
                     >
                       <MagicCard
-                        className="h-fit border border-gray-200/50 bg-white/80 p-6 backdrop-blur-sm"
+                        className="h-fit border border-slate-200/80 bg-white p-4 shadow-sm backdrop-blur-sm transition-shadow duration-300 hover:shadow-lg sm:p-5"
                         gradientColor="rgba(59, 130, 246, 0.1)"
                         borderColor="rgba(59, 130, 246, 0.2)"
                         spotlightColor="rgba(59, 130, 246, 0.1)"
                       >
                         {/* Project Image */}
-                        <div className="relative h-32 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg mb-4">
+                        <div className="relative mb-3 h-28 overflow-hidden rounded-xl bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 sm:h-32">
                           <div className="absolute inset-0 flex items-center justify-center">
                             <div className="text-4xl text-gray-300">
                               {project.category === "AI/ML" && "🤖"}
@@ -507,9 +513,9 @@ export default function ProjectsPage() {
                         </div>
 
                         {/* Project Content */}
-                        <div className="space-y-4">
-                          <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
-                            <Badge variant="secondary" className="max-w-full whitespace-normal break-words">
+                        <div className="space-y-2.5">
+                          <div className="flex min-w-0 items-center justify-between gap-2">
+                            <Badge variant="secondary" className="max-w-[70%] truncate whitespace-nowrap" title={project.category}>
                               {project.category}
                             </Badge>
                             <div className="flex shrink-0 items-center">
@@ -521,96 +527,107 @@ export default function ProjectsPage() {
                             </div>
                           </div>
 
-                          <h3 className="mb-1 break-words text-lg font-semibold text-gray-900">
+                          <h3 className="line-clamp-2 min-h-12 break-words text-base font-semibold leading-6 text-slate-900 sm:text-lg">
                             {project.title}
                           </h3>
 
-                          <p className="mb-2 break-words text-sm text-gray-600">
+                          <p className="line-clamp-2 min-h-10 break-words text-sm leading-5 text-slate-600">
                             {project.shortDescription}
                           </p>
 
                           {/* Technologies */}
-                          <div className="flex flex-wrap gap-1 mb-2">
-                            {project.technologies.slice(0, 3).map((tech) => (
+                          <div className="flex h-7 flex-nowrap gap-1.5 overflow-hidden">
+                            {project.technologies.slice(0, 2).map((tech) => (
                               <Badge
                                 key={tech}
                                 variant="outline"
-                                className="max-w-full whitespace-normal break-words text-xs"
+                                className="max-w-[42%] shrink truncate whitespace-nowrap text-xs"
+                                title={tech}
+                                tabIndex={0}
+                                aria-label={tech}
                               >
                                 {tech}
                               </Badge>
                             ))}
-                            {project.technologies.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{project.technologies.length - 3} more
+                            {project.technologies.length > 2 && (
+                              <Badge variant="outline" className="shrink-0 whitespace-nowrap text-xs" title={project.technologies.slice(2).join(", ")} tabIndex={0} aria-label={`More technologies: ${project.technologies.slice(2).join(", ")}`}>
+                                +{project.technologies.length - 2} more
                               </Badge>
                             )}
                           </div>
 
                           {/* Stats */}
-                          <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-                            <div className="flex items-center">
+                          <div className="flex h-6 items-center justify-between gap-2 overflow-hidden text-xs text-gray-500">
+                            <div className="flex min-w-0 items-center truncate">
                               <Eye className="h-4 w-4 mr-1" />
-                              {project.views} views
+                              <span className="truncate">{project.views} views</span>
                             </div>
-                            <div className="flex items-center">
+                            <div className="flex min-w-0 items-center truncate">
                               <Calendar className="h-4 w-4 mr-1" />
-                              {project.estimatedTime}
+                              <span className="truncate" title={project.estimatedTime}>{project.estimatedTime}</span>
                             </div>
                           </div>
 
                           {/* Domains */}
-                          <div className="mb-2">
-                            <div className="text-xs text-gray-500 mb-1">
+                          <div className="h-10 overflow-hidden">
+                            <div className="mb-1 text-[11px] font-medium uppercase tracking-wide text-slate-500">
                               Domains:
                             </div>
                             {formatDomains(project.domain)}
                           </div>
 
                           {/* Quick Actions */}
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex space-x-2">
-                              {project.demoUrl && (
-                                <a
-                                  href={project.demoUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-                                  title="View Demo"
-                                >
-                                  <ExternalLink className="h-4 w-4" />
-                                </a>
-                              )}
-                              {project.downloadUrl && (
-                                <a
-                                  href={project.downloadUrl}
-                                  className="p-2 text-gray-400 hover:text-green-600 transition-colors"
-                                  title="Download"
-                                >
-                                  <Download className="h-4 w-4" />
-                                </a>
+                          <div className="grid grid-cols-[auto,minmax(0,1fr)] items-center gap-2 border-t border-slate-100 pt-2">
+                            <div className="flex min-w-0 items-center gap-1.5">
+                              <WhatsAppButton
+                                project={project}
+                                type="purchase"
+                                variant="outline"
+                                buttonProps={{ size: "sm" }}
+                                className="h-9 shrink-0 whitespace-nowrap border-green-600 px-2.5 text-green-700 hover:bg-green-50"
+                              >
+                                Chat
+                              </WhatsAppButton>
+                              {Boolean(project.demoUrl || project.downloadUrl) && (
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      aria-label={`More actions for ${project.title}`}
+                                      className="h-9 w-9 shrink-0 text-slate-500"
+                                    >
+                                      <MoreHorizontal aria-hidden="true" className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="start">
+                                    <DropdownMenuLabel>Project links</DropdownMenuLabel>
+                                    {project.demoUrl && (
+                                      <DropdownMenuItem asChild>
+                                        <a href={project.demoUrl} target="_blank" rel="noopener noreferrer">
+                                          <ExternalLink aria-hidden="true" /> View demo
+                                        </a>
+                                      </DropdownMenuItem>
+                                    )}
+                                    {project.downloadUrl && (
+                                      <DropdownMenuItem asChild>
+                                        <a href={project.downloadUrl}>
+                                          <Download aria-hidden="true" /> Download
+                                        </a>
+                                      </DropdownMenuItem>
+                                    )}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               )}
                             </div>
-                            <WhatsAppButton
-                              project={project}
-                              type="purchase"
-                              variant="outline"
-                              buttonProps={{ size: "sm" }}
-                              className="text-green-600 border-green-600 hover:bg-green-50"
-                            >
-                              Chat
-                            </WhatsAppButton>
-                          </div>
-
-                          <ShimmerButton className="w-full text-white">
                             <Link
                               href={`/projects/${project._id}`}
-                              className="w-full flex items-center justify-center text-white"
+                              className="inline-flex h-9 min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-slate-950 px-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
                             >
-                              View Details
-                              <ArrowRight className="ml-2 h-4 w-4" />
+                              <span className="truncate">View details</span>
+                              <ArrowRight aria-hidden="true" className="h-4 w-4 shrink-0" />
                             </Link>
-                          </ShimmerButton>
+                          </div>
                         </div>
                       </MagicCard>
                     </motion.div>

@@ -5,6 +5,7 @@ import connectDB from "@/lib/mongodb";
 import { authOptions } from "@/lib/auth";
 import Research from "@/models/Research";
 import { validateResearchBody } from "@/lib/research-validation";
+import { invalidatePublicContent } from "@/lib/content-cache.js";
 
 function isAdmin(session) {
   return session?.user?.role === "admin";
@@ -56,6 +57,7 @@ export async function PATCH(request, { params }) {
     if (!research) {
       return NextResponse.json({ message: "Research not found." }, { status: 404 });
     }
+    invalidatePublicContent("public-research");
     return NextResponse.json({ research });
   } catch (error) {
     console.error("Error updating research:", error);
@@ -78,6 +80,7 @@ export async function DELETE(_request, { params }) {
     if (!research) {
       return NextResponse.json({ message: "Research not found." }, { status: 404 });
     }
+    invalidatePublicContent("public-research");
     return NextResponse.json({ message: "Research permanently deleted." });
   } catch (error) {
     console.error("Error deleting research:", error);

@@ -55,9 +55,79 @@
 }
 
 body {
-  background: hsl(var(--color-background));
-  color: hsl(var(--color-foreground));
+  background: #f8fafc;
+  color: #0f172a;
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: #dbeafe; color: #172554; }
+
+/* Shared visual foundation for public and admin screens. */
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+button, [role="button"] { transition: background-color .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease; }
+input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+  border-radius: .75rem;
+  border-color: #cbd5e1;
+  background-color: #fff;
+  color: #0f172a;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: #3b82f6;
+  outline: 3px solid rgb(59 130 246 / 15%);
+  outline-offset: 1px;
+}
+table { border-collapse: separate; border-spacing: 0; }
+th { color: #475569; font-size: .75rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+td, th { border-color: #e2e8f0; }
+
+.site-navigation { transition: box-shadow .2s ease, background .2s ease; }
+.site-navigation a:focus-visible, .site-navigation button:focus-visible {
+  outline: 3px solid rgb(59 130 246 / 55%);
+  outline-offset: 2px;
+}
+
+/* Admin screens share a quieter workspace treatment while retaining their existing flows. */
+body:has(.site-navigation[data-admin="true"]) {
+  background: #f1f5f9;
+}
+body:has(.site-navigation[data-admin="true"]) .site-navigation {
+  border-bottom-color: #dbe4ef;
+  box-shadow: 0 4px 18px rgb(15 23 42 / 5%);
+}
+body:has(.site-navigation[data-admin="true"]) .bg-white.shadow,
+body:has(.site-navigation[data-admin="true"]) .bg-white.shadow-sm {
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 2px 12px rgb(15 23 42 / 4%);
+}
+body:has(.site-navigation[data-admin="true"]) table {
+  overflow: hidden;
+  border-radius: .9rem;
+}
+body:has(.site-navigation[data-admin="true"]) th {
+  background: #f8fafc;
+  padding-top: .85rem;
+  padding-bottom: .85rem;
+}
+body:has(.site-navigation[data-admin="true"]) td {
+  padding-top: .8rem;
+  padding-bottom: .8rem;
+}
+body:has(.site-navigation[data-admin="true"]) tr:hover td {
+  background-color: #f8fafc;
+}
+
+/* Consistent content rhythm and polished panels across the public catalogue. */
+body:not(:has(.site-navigation[data-admin="true"])) main > section:not(:first-child) {
+  scroll-margin-top: 6rem;
+}
+body:not(:has(.site-navigation[data-admin="true"])) :where(.rounded-lg, .rounded-xl, .rounded-2xl) {
+  scroll-margin-top: 6rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 
 @theme inline {
@@ -160,7 +230,7 @@ body {
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: oklch(0.54 0.2 257);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -171,7 +241,7 @@ body {
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: oklch(0.62 0.18 257);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);

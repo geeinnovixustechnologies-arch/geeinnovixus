@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import connectDB from "@/lib/mongodb.js";
 import { authOptions } from "@/lib/auth.js";
 import LearningOffering from "@/models/LearningOffering.js";
+import { invalidatePublicContent } from "@/lib/content-cache.js";
 
 const editableFields = [
   "title",
@@ -94,6 +95,7 @@ export async function GET(_request, { params }) {
     if (session?.user?.role !== "admin") query.isActive = true;
     const offering = await LearningOffering.findOne(query).lean();
     if (!offering) return NextResponse.json({ message: "Offering not found" }, { status: 404 });
+    invalidatePublicContent("public-learning-offerings");
     return NextResponse.json({ offering });
   } catch (error) {
     console.error("Error fetching learning offering:", error);
@@ -160,6 +162,7 @@ export async function DELETE(_request, { params }) {
     await connectDB();
     const offering = await LearningOffering.findByIdAndDelete(id);
     if (!offering) return NextResponse.json({ message: "Offering not found" }, { status: 404 });
+    invalidatePublicContent("public-learning-offerings");
     return NextResponse.json({ success: true, message: "Offering permanently deleted" });
   } catch (error) {
     console.error("Error deleting learning offering:", error);

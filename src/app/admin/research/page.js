@@ -197,9 +197,14 @@ export default function AdminResearchPage() {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
       <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">
-        <header>
-          <h1 className="text-3xl font-bold">Research Management</h1>
-          <p className="mt-2 text-gray-600">Manage the public R&amp;D listings.</p>
+        <header className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Research Management</h1>
+            <p className="mt-2 text-gray-600">Manage the public R&amp;D listings.</p>
+          </div>
+          <Link href="/research" target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-700 hover:text-blue-900">
+            Preview public research
+          </Link>
         </header>
         <form onSubmit={saveRecord} className="space-y-4 rounded-xl bg-white p-6 shadow">
           <h2 className="text-xl font-semibold">{editingId ? "Edit research" : "Add research"}</h2>

@@ -158,7 +158,7 @@ export default function AdminGalleryPage() {
             <h1 className="mt-1 text-3xl font-bold text-slate-950">Gallery</h1>
             <p className="mt-2 text-slate-600">Publish real images with useful descriptions and course or event context.</p>
           </div>
-          <Link href="/gallery" className="font-medium text-blue-700 hover:text-blue-900">View public gallery</Link>
+          <Link href="/gallery" target="_blank" rel="noopener noreferrer" className="font-medium text-blue-700 hover:text-blue-900">Preview as visitor ↗</Link>
         </div>
 
         {error && <p role="alert" className="mb-5 rounded-lg border border-red-200 bg-red-50 p-3 text-red-800">{error}</p>}
@@ -210,7 +210,7 @@ export default function AdminGalleryPage() {
               <article key={image._id} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                 <div className="relative aspect-[4/3] bg-slate-100">
                   {image.displayUrl && (
-                    <Image src={image.displayUrl} alt={image.altText} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" unoptimized className="object-cover" />
+                    <Image src={image.displayUrl} alt={image.altText} fill sizes="(max-width: 640px) 100vw, (max-width: 1023px) 50vw, 33vw" quality={75} className="object-cover" />
                   )}
                 </div>
                 <div className="p-4">

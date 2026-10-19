@@ -65,26 +65,27 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-slate-50">
       <Navigation />
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <section className="relative isolate overflow-hidden bg-slate-950 text-white">
+        <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(37,99,235,0.35),transparent_50%),radial-gradient(ellipse_at_bottom_left,rgba(124,58,237,0.24),transparent_45%)]" />
+        <div aria-hidden="true" className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(148,163,184,.14)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,.14)_1px,transparent_1px)] [background-size:64px_64px] [mask-image:linear-gradient(to_bottom,black,transparent)]" />
+        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8 lg:py-32">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center"
+            className="mx-auto max-w-5xl text-center"
           >
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="mb-6 text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl">
               Innovating the Future with
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-sky-300 via-blue-300 to-violet-300 bg-clip-text text-transparent">
                 {" "}
                 GEE INNOVIXUS
               </span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            <p className="mx-auto mb-9 max-w-3xl text-lg leading-8 text-slate-300 sm:text-xl">
               Leading academic project consultancy and research publication
               services. We transform your ideas into groundbreaking solutions
               with cutting-edge technology.
@@ -92,14 +93,14 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/projects"
-                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
+                className="inline-flex min-h-12 items-center rounded-xl bg-white px-7 py-3.5 font-semibold text-slate-950 shadow-lg shadow-blue-950/20 transition duration-200 hover:-translate-y-0.5 hover:bg-blue-50"
               >
                 Explore Projects
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
               <Link
                 href="/contact"
-                className="inline-flex items-center px-8 py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:border-blue-600 hover:text-blue-600 transition-all duration-300"
+                className="inline-flex min-h-12 items-center rounded-xl border border-white/20 bg-white/5 px-7 py-3.5 font-semibold text-white backdrop-blur transition duration-200 hover:border-white/40 hover:bg-white/10"
               >
                 Get Started
               </Link>
@@ -198,22 +199,27 @@ export default function HomePage() {
                     >
                       <Zap className="h-6 w-6 text-white" />
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                    <h3 className="mb-2 line-clamp-2 h-14 overflow-hidden text-lg font-semibold leading-7 text-slate-900">
                       {service.name}
                     </h3>
-                    <p className="text-gray-600 mb-4">
+                    <p className="mb-3 line-clamp-3 h-[3.75rem] overflow-hidden text-sm leading-5 text-slate-600">
                       {service.shortDescription || service.description}
                     </p>
                     <ul className="space-y-2">
-                      {service.features.map((feature, featureIndex) => (
+                      {service.features.slice(0, 3).map((feature, featureIndex) => (
                         <li
                           key={featureIndex}
-                          className="flex items-center text-sm text-gray-500"
+                          className="flex min-w-0 items-center text-sm text-gray-500"
                         >
-                          <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                          {feature}
+                          <CheckCircle className="mr-2 h-4 w-4 shrink-0 text-green-500" />
+                          <span className="truncate" title={feature}>{feature}</span>
                         </li>
                       ))}
+                      {service.features.length > 3 && (
+                        <li className="pt-1 text-xs font-semibold text-blue-700" title={service.features.slice(3).join(", ")} tabIndex={0} aria-label={`More features: ${service.features.slice(3).join(", ")}`}>
+                          +{service.features.length - 3} more features
+                        </li>
+                      )}
                     </ul>
                   </CardContent>
                 </Card>
@@ -275,7 +281,7 @@ export default function HomePage() {
                     />
                   ))}
                 </div>
-                <p className="text-gray-700 mb-4 italic">
+                <p className="mb-4 line-clamp-5 min-h-[7.5rem] text-sm leading-6 text-slate-700 italic">
                   &quot;{testimonial.review}&quot;
                 </p>
                 <div className="border-t pt-4">

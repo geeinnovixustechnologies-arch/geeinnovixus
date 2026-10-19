@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
 import {
   Menu,
   X,
@@ -23,6 +24,8 @@ import {
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+  const isAdminPage = pathname?.startsWith("/admin");
   const { data: session, status } = useSession();
 
   const navigation = [
@@ -43,28 +46,31 @@ export default function Navigation() {
     { name: "Learning Hub", href: "/admin/learning-hub", icon: BookOpen },
     { name: "Gallery", href: "/admin/gallery", icon: Images },
   ];
+  const primaryNavigation = isAdminPage ? adminNavigation : navigation;
 
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-50">
+    <nav data-admin={isAdminPage ? "true" : "false"} className="site-navigation sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 shadow-sm backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex h-[4.5rem] items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <div className="flex-shrink-0">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  <h1 className="text-lg font-extrabold tracking-tight text-slate-950 sm:text-xl">
                 GEE INNOVIXUS
               </h1>
+                  <span className="ml-2 hidden rounded-full bg-blue-50 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-blue-700 sm:inline-flex">{isAdminPage ? "Admin" : "Innovate"}</span>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:block">
-            <div className="ml-10 flex items-baseline space-x-4">
-              {navigation.map((item) => (
+            <div className="ml-4 flex items-baseline gap-1">
+              {primaryNavigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                  aria-current={pathname === item.href ? "page" : undefined}
+                  className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200 ${pathname === item.href ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"}`}
                 >
                   {item.name}
                 </Link>
@@ -167,7 +173,7 @@ export default function Navigation() {
               aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
               aria-expanded={isOpen}
               aria-controls="mobile-navigation"
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-blue-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+                    className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white p-2.5 text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
             >
               {isOpen ? (
                 <X className="block h-6 w-6" />
@@ -191,7 +197,7 @@ export default function Navigation() {
             className="lg:hidden bg-white border-t border-gray-200"
           >
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              {navigation.map((item) => (
+              {primaryNavigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}

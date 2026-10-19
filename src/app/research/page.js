@@ -108,15 +108,15 @@ export default function ResearchPage() {
     if (!services || services.length === 0) return null;
 
     return (
-      <div className="flex flex-wrap gap-1">
-        {services.slice(0, 3).map((service) => (
-          <Badge key={service} variant="secondary" className="max-w-full whitespace-normal break-words text-xs">
+      <div className="flex min-w-0 flex-nowrap gap-1 overflow-hidden">
+        {services.slice(0, 2).map((service) => (
+          <Badge key={service} variant="secondary" className="max-w-[46%] truncate whitespace-nowrap text-xs" title={service} tabIndex={0} aria-label={service}>
             {service}
           </Badge>
         ))}
-        {services.length > 3 && (
-          <Badge variant="secondary" className="text-xs">
-            +{services.length - 3} more
+        {services.length > 2 && (
+          <Badge variant="secondary" className="shrink-0 whitespace-nowrap text-xs" title={services.slice(2).join(", ")} tabIndex={0} aria-label={`More services: ${services.slice(2).join(", ")}`}>
+            +{services.length - 2} more
           </Badge>
         )}
       </div>
@@ -267,14 +267,14 @@ export default function ResearchPage() {
       {/* Research Services Grid */}
       <section className="py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
+          <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-7 2xl:grid-cols-4">
             {filteredResearch.map((item) => {
               const Icon =
                 researchIcons[item.icon?.trim().toLowerCase()] || Lightbulb;
               return (
                 <MagicCard
                     key={item._id}
-                    className="h-fit border border-gray-200/50 bg-white/80 p-6 backdrop-blur-sm"
+                    className="h-fit border border-slate-200/80 bg-white p-5 shadow-sm backdrop-blur-sm"
                     gradientColor="rgba(59, 130, 246, 0.1)"
                     borderColor="rgba(59, 130, 246, 0.2)"
                     spotlightColor="rgba(59, 130, 246, 0.1)"
@@ -283,10 +283,10 @@ export default function ResearchPage() {
                   <div className="flex min-w-0 items-start space-x-3">
                     <Icon aria-hidden="true" className="h-8 w-8 text-blue-600" />
                     <div className="min-w-0">
-                      <h3 className="break-words text-lg font-semibold text-gray-900">
+                      <h3 className="line-clamp-2 min-h-12 break-words text-base font-semibold leading-6 text-slate-900 sm:text-lg">
                         {item.title}
                       </h3>
-                      <Badge variant="secondary" className="mt-1 max-w-full whitespace-normal break-words">
+                      <Badge variant="secondary" className="mt-1 max-w-full truncate whitespace-nowrap" title={item.category}>
                         {item.category}
                       </Badge>
                     </div>
@@ -299,37 +299,37 @@ export default function ResearchPage() {
                   </div>
                 </div>
 
-                <p className="mb-4 break-words text-sm text-gray-600">{item.description}</p>
+                <p className="mb-3 line-clamp-2 h-10 overflow-hidden break-words text-sm leading-5 text-slate-600">{item.description}</p>
 
-                <div className="space-y-3 mb-4">
+                <div className="mb-3 space-y-2">
                   <div className="flex items-center space-x-2">
                     <Clock className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm text-gray-600">
+                    <span className="min-w-0 flex-1 truncate text-sm text-gray-600" title={`Delivery: ${item.deliveryTime}`}>
                       Delivery: {item.deliveryTime}
                     </span>
                   </div>
                 </div>
 
-                <div className="mb-4">
+                <div className="mb-3">
                   <h4 className="font-semibold mb-2 text-sm text-gray-900">
                     Services:
                   </h4>
                   {formatServices(item.services)}
                 </div>
 
-                <div className="mb-4">
+                <div className="mb-3">
                   <h4 className="font-semibold mb-2 text-sm text-gray-900">
                     Features:
                   </h4>
-                  <div className="flex flex-wrap gap-1">
-                    {(item.features || []).slice(0, 3).map((feature, index) => (
-                      <Badge key={index} variant="outline" className="max-w-full whitespace-normal break-words text-xs">
+                  <div className="flex h-7 flex-nowrap gap-1 overflow-hidden">
+                    {(item.features || []).slice(0, 2).map((feature, index) => (
+                      <Badge key={index} variant="outline" className="max-w-[46%] truncate whitespace-nowrap text-xs" title={feature} tabIndex={0} aria-label={feature}>
                         {feature}
                       </Badge>
                     ))}
-                    {(item.features || []).length > 3 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{item.features.length - 3} more
+                    {(item.features || []).length > 2 && (
+                      <Badge variant="outline" className="shrink-0 whitespace-nowrap text-xs" title={item.features.slice(2).join(", ")} tabIndex={0} aria-label={`More features: ${item.features.slice(2).join(", ")}`}>
+                        +{item.features.length - 2} more
                       </Badge>
                     )}
                   </div>

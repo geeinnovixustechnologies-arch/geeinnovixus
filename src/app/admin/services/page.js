@@ -248,12 +248,17 @@ export default function AdminServicesPage() {
                 Manage all services in the system
               </p>
             </div>
-            <Link href="/admin/services/new">
-              <Button>
-                <Plus className="h-5 w-5 mr-2" />
-                Add New Service
-              </Button>
-            </Link>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link href="/services" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-blue-700 hover:text-blue-900">
+                Preview public services
+              </Link>
+              <Link href="/admin/services/new">
+                <Button>
+                  <Plus className="h-5 w-5 mr-2" />
+                  Add New Service
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -496,8 +501,11 @@ export default function AdminServicesPage() {
                       <div className="flex items-center justify-end space-x-2">
                         <Button variant="ghost" size="sm" asChild>
                           <Link
-                            href={`/services/${service._id}`}
-                            title="View Service"
+                            href="/services"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Preview public services"
+                            aria-label={`Preview public services for ${service.name}`}
                           >
                             <Eye className="h-4 w-4" />
                           </Link>

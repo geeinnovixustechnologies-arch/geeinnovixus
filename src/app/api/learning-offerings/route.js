@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import connectDB from "@/lib/mongodb.js";
 import { authOptions } from "@/lib/auth.js";
 import LearningOffering from "@/models/LearningOffering.js";
+import { createPublicContentCache, invalidatePublicContent } from "@/lib/content-cache.js";
 
 const MAX_LIMIT = 100;
 
@@ -72,9 +73,31 @@ function validateOffering(body) {
   return null;
 }
 
+async function loadPublicOfferings({ page, limit, search, category, level }) {
+  await connectDB();
+  const query = { isActive: true };
+  if (search) {
+    const matcher = new RegExp(escapeRegex(search), "i");
+    query.$or = [
+      { title: matcher }, { description: matcher }, { shortDescription: matcher },
+    ];
+  }
+  if (category && category !== "all") query.category = category;
+  if (level && level !== "all") query.level = level;
+  const [offerings, total] = await Promise.all([
+    LearningOffering.find(query).sort({ createdAt: -1 })
+      .skip((page - 1) * limit).limit(limit).lean(),
+    LearningOffering.countDocuments(query),
+  ]);
+  return { offerings, total, page, limit, totalPages: Math.ceil(total / limit) };
+}
+
+const getCachedPublicOfferings = createPublicContentCache(
+  "public-learning-offerings-v1", "public-learning-offerings", loadPublicOfferings
+);
+
 export async function GET(request) {
   try {
-    await connectDB();
     const { searchParams } = new URL(request.url);
     const session = await getServerSession(authOptions);
     const isAdmin = session?.user?.role === "admin";
@@ -84,39 +107,33 @@ export async function GET(request) {
       positiveInteger(searchParams.get("limit"), 12),
       MAX_LIMIT
     );
-    const query = includeInactive ? {} : { isActive: true };
     const search = searchParams.get("search")?.trim();
     const category = searchParams.get("category");
     const level = searchParams.get("level");
-
-    if (search) {
-      const matcher = new RegExp(escapeRegex(search), "i");
-      query.$or = [
-        { title: matcher },
-        { description: matcher },
-        { shortDescription: matcher },
-      ];
+    let data;
+    if (!includeInactive && !isAdmin) {
+      data = await getCachedPublicOfferings({ page, limit, search, category, level });
+    } else {
+      await connectDB();
+      const query = includeInactive ? {} : { isActive: true };
+      if (search) {
+        const matcher = new RegExp(escapeRegex(search), "i");
+        query.$or = [
+          { title: matcher }, { description: matcher }, { shortDescription: matcher },
+        ];
+      }
+      if (category && category !== "all") query.category = category;
+      if (level && level !== "all") query.level = level;
+      const [offerings, total] = await Promise.all([
+        LearningOffering.find(query).sort({ createdAt: -1 })
+          .skip((page - 1) * limit).limit(limit).lean(),
+        LearningOffering.countDocuments(query),
+      ]);
+      data = { offerings, total, page, limit, totalPages: Math.ceil(total / limit) };
     }
-    if (category && category !== "all") query.category = category;
-    if (level && level !== "all") query.level = level;
-
-    const [offerings, total] = await Promise.all([
-      LearningOffering.find(query)
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .lean(),
-      LearningOffering.countDocuments(query),
-    ]);
 
     return NextResponse.json(
-      {
-        offerings,
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
+      data,
       { headers: { "Cache-Control": "no-store" } }
     );
   } catch (error) {
@@ -163,6 +180,7 @@ export async function POST(request) {
       image: body.image,
       isActive: body.isActive ?? true,
     });
+    invalidatePublicContent("public-learning-offerings");
 
     return NextResponse.json({ offering }, { status: 201 });
   } catch (error) {

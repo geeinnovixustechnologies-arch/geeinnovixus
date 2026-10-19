@@ -4,6 +4,10 @@ import Project from "@/models/Project.js";
 import { projectValidation, validateData } from "@/lib/validations.js";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import {
+  createPublicContentCache,
+  invalidatePublicContent,
+} from "@/lib/content-cache.js";
 
 const MAX_LIMIT = 100;
 const SORT_FIELDS = new Set([
@@ -23,11 +27,49 @@ function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+async function loadProjects({ page, limit, category, domain, technology, difficulty, search, featured, sortBy, sortOrder }) {
+  await connectDB();
+  const query = { isActive: true };
+  if (category) query.category = category;
+  if (domain) query.domain = { $in: [domain] };
+  if (technology) query.technologies = { $in: [technology] };
+  if (difficulty) query.difficulty = difficulty;
+  if (featured === "true") query.isFeatured = true;
+  if (search) {
+    const matcher = new RegExp(escapeRegex(search.trim()), "i");
+    query.$or = [
+      { title: matcher },
+      { shortDescription: matcher },
+      { description: matcher },
+      { tags: { $in: [matcher] } },
+    ];
+  }
+  const sortObj = { [sortBy]: sortOrder === "asc" ? 1 : -1 };
+  const [projects, total] = await Promise.all([
+    Project.find(query).sort(sortObj).skip((page - 1) * limit).limit(limit).lean(),
+    Project.countDocuments(query),
+  ]);
+  const totalPages = Math.ceil(total / limit);
+  return {
+    projects,
+    totalProjects: total,
+    page,
+    limit,
+    totalPages,
+    hasNextPage: page < totalPages,
+    hasPrevPage: page > 1,
+  };
+}
+
+const getCachedProjects = createPublicContentCache(
+  "public-projects-v1",
+  "public-projects",
+  loadProjects
+);
+
 // GET /api/projects - Get all projects
 export async function GET(request) {
   try {
-    await connectDB();
-
     const { searchParams } = new URL(request.url);
     const page = safeInteger(searchParams.get("page"), 1);
     const limit = Math.min(safeInteger(searchParams.get("limit"), 12), MAX_LIMIT);
@@ -45,67 +87,39 @@ export async function GET(request) {
     const session = await getServerSession(authOptions);
     const isAdmin = session && session.user.role === "admin";
 
-    // Build query - admin can see all projects, others only active
-    const query = isAdmin ? {} : { isActive: true };
-
-    if (category) {
-      query.category = category;
-    }
-
-    if (domain) {
-      query.domain = { $in: [domain] };
-    }
-
-    if (technology) {
-      query.technologies = { $in: [technology] };
-    }
-
-    if (difficulty) {
-      query.difficulty = difficulty;
-    }
-
-    if (featured === "true") {
-      query.isFeatured = true;
-    }
-
-    if (search) {
-      const matcher = new RegExp(escapeRegex(search.trim()), "i");
-      query.$or = [
-        { title: matcher },
-        { shortDescription: matcher },
-        { description: matcher },
-        { tags: { $in: [matcher] } },
-      ];
-    }
-
-    // Build sort object
-    const sortObj = {};
-    sortObj[sortBy] = sortOrder === "asc" ? 1 : -1;
-
-    // Calculate skip
-    const skip = (page - 1) * limit;
-
-    // Execute query
-    const [projects, total] = await Promise.all([
-      Project.find(query).sort(sortObj).skip(skip).limit(limit).lean(),
-      Project.countDocuments(query),
-    ]);
-
-    // Calculate pagination info
-    const totalPages = Math.ceil(total / limit);
-    const hasNextPage = page < totalPages;
-    const hasPrevPage = page > 1;
+    const options = {
+      page, limit, category, domain, technology, difficulty, search,
+      featured, sortBy, sortOrder,
+    };
+    const data = isAdmin
+      ? await (async () => {
+          await connectDB();
+          const query = {};
+          if (category) query.category = category;
+          if (domain) query.domain = { $in: [domain] };
+          if (technology) query.technologies = { $in: [technology] };
+          if (difficulty) query.difficulty = difficulty;
+          if (featured === "true") query.isFeatured = true;
+          if (search) {
+            const matcher = new RegExp(escapeRegex(search.trim()), "i");
+            query.$or = [
+              { title: matcher }, { shortDescription: matcher },
+              { description: matcher }, { tags: { $in: [matcher] } },
+            ];
+          }
+          const sortObj = { [sortBy]: sortOrder === "asc" ? 1 : -1 };
+          const [projects, total] = await Promise.all([
+            Project.find(query).sort(sortObj).skip((page - 1) * limit).limit(limit).lean(),
+            Project.countDocuments(query),
+          ]);
+          const totalPages = Math.ceil(total / limit);
+          return { projects, totalProjects: total, page, limit, totalPages,
+            hasNextPage: page < totalPages, hasPrevPage: page > 1 };
+        })()
+      : await getCachedProjects(options);
 
     return NextResponse.json(
-      {
-        projects,
-        totalProjects: total,
-        page,
-        limit,
-        totalPages,
-        hasNextPage,
-        hasPrevPage,
-      },
+      data,
       { headers: { "Cache-Control": "no-store" } }
     );
   } catch (error) {
@@ -147,6 +161,7 @@ export async function POST(request) {
 
     const project = new Project(validation.data);
     await project.save();
+    invalidatePublicContent("public-projects");
 
     return NextResponse.json(
       {

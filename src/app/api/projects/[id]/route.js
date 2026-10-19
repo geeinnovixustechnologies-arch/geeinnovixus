@@ -4,6 +4,7 @@ import Project from "@/models/Project.js";
 import { projectValidation } from "@/lib/validations.js";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.js";
+import { invalidatePublicContent } from "@/lib/content-cache.js";
 
 // GET /api/projects/[id] - Get single project
 export async function GET(request, { params }) {
@@ -96,6 +97,8 @@ export async function PUT(request, { params }) {
       );
     }
 
+    invalidatePublicContent("public-projects");
+
     return NextResponse.json({
       success: true,
       message: "Project updated successfully",
@@ -139,6 +142,8 @@ export async function DELETE(request, { params }) {
         { status: 404 }
       );
     }
+
+    invalidatePublicContent("public-projects");
 
     return NextResponse.json({
       success: true,

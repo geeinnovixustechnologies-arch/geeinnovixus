@@ -107,15 +107,15 @@ export default function ServicesPage() {
     if (!domains || domains.length === 0) return null;
 
     return (
-      <div className="flex flex-wrap gap-1">
-        {domains.slice(0, 3).map((domain) => (
-          <Badge key={domain} variant="secondary" className="text-xs">
+      <div className="flex min-w-0 flex-nowrap gap-1 overflow-hidden">
+        {domains.slice(0, 2).map((domain) => (
+          <Badge key={domain} variant="secondary" className="max-w-[46%] truncate whitespace-nowrap text-xs" title={domain} tabIndex={0} aria-label={domain}>
             {domain}
           </Badge>
         ))}
-        {domains.length > 3 && (
-          <Badge variant="secondary" className="text-xs">
-            +{domains.length - 3} more
+        {domains.length > 2 && (
+          <Badge variant="secondary" className="shrink-0 whitespace-nowrap text-xs" title={domains.slice(2).join(", ")} tabIndex={0} aria-label={`More domains: ${domains.slice(2).join(", ")}`}>
+            +{domains.length - 2} more
           </Badge>
         )}
       </div>
@@ -265,14 +265,14 @@ export default function ServicesPage() {
       {/* Services Grid */}
       <section className="py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
+          <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-7 2xl:grid-cols-4">
             {filteredServices.map((service) => {
               const Icon =
                 serviceIcons[service.icon?.trim().toLowerCase()] || Briefcase;
               return (
                 <MagicCard
                   key={service._id}
-                  className="h-fit min-w-0 border border-gray-200/50 bg-white/80 p-6 backdrop-blur-sm"
+                  className="h-fit min-w-0 border border-slate-200/80 bg-white p-5 shadow-sm backdrop-blur-sm"
                   gradientColor="rgba(59, 130, 246, 0.1)"
                   borderColor="rgba(59, 130, 246, 0.2)"
                   spotlightColor="rgba(59, 130, 246, 0.1)"
@@ -284,12 +284,13 @@ export default function ServicesPage() {
                         className="mt-1 h-8 w-8 shrink-0 text-blue-600"
                       />
                       <div className="min-w-0">
-                        <h3 className="break-words text-lg font-semibold text-gray-900">
+                      <h3 className="line-clamp-2 min-h-12 break-words text-base font-semibold leading-6 text-slate-900 sm:text-lg">
                           {service.name}
                         </h3>
                         <Badge
                           variant="secondary"
-                          className="mt-1 max-w-full whitespace-normal break-words"
+                          className="mt-1 max-w-full truncate whitespace-nowrap"
+                          title={service.category}
                         >
                           {service.category}
                         </Badge>
@@ -303,11 +304,11 @@ export default function ServicesPage() {
                     </div>
                   </div>
 
-                  <p className="mb-4 break-words text-sm text-gray-600">
+                  <p className="mb-3 line-clamp-2 h-10 overflow-hidden break-words text-sm leading-5 text-slate-600">
                     {service.description}
                   </p>
 
-                  <div className="space-y-3 mb-4">
+                  <div className="mb-3 space-y-2">
                     <div className="flex items-center space-x-2">
                       <Tag aria-hidden="true" className="h-4 w-4 shrink-0 text-blue-600" />
                       <span className="text-sm text-gray-600 font-medium">
@@ -318,31 +319,34 @@ export default function ServicesPage() {
 
                     <div className="flex items-center space-x-2">
                       <Clock aria-hidden="true" className="h-4 w-4 shrink-0 text-blue-600" />
-                      <span className="break-words text-sm text-gray-600">
+                      <span className="min-w-0 flex-1 truncate text-sm text-gray-600" title={`Delivery: ${service.deliveryTime}`}>
                         Delivery: {service.deliveryTime}
                       </span>
                     </div>
                   </div>
 
-                  <div className="mb-4">
+                  <div className="mb-3">
                     <h4 className="font-semibold mb-2 text-sm text-gray-900">
                       Key Features:
                     </h4>
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex h-7 flex-nowrap gap-1 overflow-hidden">
                       {(service.features || [])
-                        .slice(0, 4)
+                        .slice(0, 2)
                         .map((feature, index) => (
                           <Badge
                             key={index}
                             variant="outline"
-                            className="max-w-full whitespace-normal break-words text-xs"
+                            className="max-w-[46%] truncate whitespace-nowrap text-xs"
+                            title={feature}
+                            tabIndex={0}
+                            aria-label={feature}
                           >
                             {feature}
                           </Badge>
                         ))}
-                      {(service.features || []).length > 4 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{service.features.length - 4} more
+                      {(service.features || []).length > 2 && (
+                        <Badge variant="outline" className="shrink-0 whitespace-nowrap text-xs" title={service.features.slice(2).join(", ")} tabIndex={0} aria-label={`More features: ${service.features.slice(2).join(", ")}`}>
+                          +{service.features.length - 2} more
                         </Badge>
                       )}
                     </div>

@@ -218,11 +218,11 @@ export default function LearningHubPage() {
                       : "learning programs"}
                   </p>
                 )}
-                <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
+                <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-7 2xl:grid-cols-4">
                   {visibleOfferings.map((offering) => (
                     <MagicCard
                       key={offering._id}
-                      className="h-fit border border-gray-200/50 bg-white/80 p-6 backdrop-blur-sm"
+                      className="h-fit border border-slate-200/80 bg-white p-5 shadow-sm backdrop-blur-sm"
                       gradientColor="rgba(59, 130, 246, 0.1)"
                     >
                       <div>
@@ -235,27 +235,27 @@ export default function LearningHubPage() {
                               />
                             </span>
                             <div className="min-w-0 flex-1">
-                              <h2 className="break-words text-base font-semibold text-gray-900 sm:text-lg">
+                              <h2 className="line-clamp-2 min-h-12 break-words text-base font-semibold leading-6 text-slate-900 sm:text-lg">
                                 {offering.title}
                               </h2>
-                              <Badge variant="secondary" className="mt-1 max-w-full whitespace-normal break-words">
+                              <Badge variant="secondary" className="mt-1 max-w-full truncate whitespace-nowrap" title={offering.category}>
                                 {offering.category}
                               </Badge>
                             </div>
                           </div>
                         </div>
 
-                        <p className="mb-4 break-words text-sm text-gray-600">
+                        <p className="mb-3 line-clamp-2 h-10 overflow-hidden break-words text-sm leading-5 text-slate-600">
                           {offering.shortDescription || offering.description}
                         </p>
 
-                        <div className="mb-4 space-y-2">
+                        <div className="mb-3 space-y-2">
                           <div className="flex items-center gap-2">
                             <Clock
                               aria-hidden="true"
                               className="h-4 w-4 shrink-0 text-blue-600"
                             />
-                            <span className="text-xs text-gray-600 sm:text-sm">
+                            <span className="min-w-0 truncate text-xs text-gray-600 sm:text-sm" title={`Duration: ${offering.duration}`}>
                               Duration: {offering.duration}
                             </span>
                           </div>
@@ -264,7 +264,7 @@ export default function LearningHubPage() {
                               aria-hidden="true"
                               className="h-4 w-4 shrink-0 text-blue-600"
                             />
-                            <span className="text-xs text-gray-600 sm:text-sm">
+                            <span className="min-w-0 truncate text-xs text-gray-600 sm:text-sm" title={`Level: ${offering.level}`}>
                               Level: {offering.level}
                             </span>
                           </div>
@@ -275,19 +275,22 @@ export default function LearningHubPage() {
                             <h3 className="mb-2 text-sm font-semibold text-gray-900">
                               Topics and tools:
                             </h3>
-                            <div className="flex flex-wrap gap-1">
-                              {offering.software.slice(0, 4).map((tool) => (
+                            <div className="flex h-7 flex-nowrap gap-1 overflow-hidden">
+                              {offering.software.slice(0, 2).map((tool) => (
                                 <Badge
                                   key={tool}
                                   variant="secondary"
-                                  className="max-w-full whitespace-normal break-words text-xs"
+                                  className="max-w-[46%] truncate whitespace-nowrap text-xs"
+                                  title={tool}
+                                  tabIndex={0}
+                                  aria-label={tool}
                                 >
                                   {tool}
                                 </Badge>
                               ))}
-                              {offering.software.length > 4 && (
-                                <Badge variant="secondary" className="text-xs">
-                                  +{offering.software.length - 4} more
+                              {offering.software.length > 2 && (
+                                <Badge variant="secondary" className="shrink-0 whitespace-nowrap text-xs" title={offering.software.slice(2).join(", ")} tabIndex={0} aria-label={`More topics and tools: ${offering.software.slice(2).join(", ")}`}>
+                                  +{offering.software.length - 2} more
                                 </Badge>
                               )}
                             </div>
@@ -300,16 +303,24 @@ export default function LearningHubPage() {
                               <h3 className="mb-2 text-sm font-semibold text-gray-900">
                                 Key features:
                               </h3>
-                              <div className="flex flex-wrap gap-1">
-                                {offering.features.slice(0, 3).map((feature) => (
+                              <div className="flex h-7 flex-nowrap gap-1 overflow-hidden">
+                                {offering.features.slice(0, 2).map((feature) => (
                                   <Badge
                                     key={feature}
                                     variant="outline"
-                                    className="max-w-full whitespace-normal break-words text-xs"
+                                    className="max-w-[46%] truncate whitespace-nowrap text-xs"
+                                    title={feature}
+                                    tabIndex={0}
+                                    aria-label={feature}
                                   >
                                     {feature}
                                   </Badge>
                                 ))}
+                                {offering.features.length > 2 && (
+                                  <Badge variant="outline" className="shrink-0 whitespace-nowrap text-xs" title={offering.features.slice(2).join(", ")} tabIndex={0} aria-label={`More features: ${offering.features.slice(2).join(", ")}`}>
+                                    +{offering.features.length - 2} more
+                                  </Badge>
+                                )}
                               </div>
                             </div>
                           )}

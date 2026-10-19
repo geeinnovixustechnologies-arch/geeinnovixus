@@ -4,6 +4,7 @@ import Service from "@/models/Service.js";
 import { serviceValidation } from "@/lib/validations.js";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.js";
+import { createPublicContentCache, invalidatePublicContent } from "@/lib/content-cache.js";
 
 const MAX_LIMIT = 100;
 const SORT_FIELDS = new Set(["createdAt", "name", "orderCount", "rating.average"]);
@@ -17,11 +18,34 @@ function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+async function loadServices({ page, limit, category, subcategory, popular, search, sortBy, sortOrder }) {
+  await connectDB();
+  const query = { isActive: true };
+  if (category) query.category = category;
+  if (subcategory) query.subcategory = subcategory;
+  if (popular === "true") query.isPopular = true;
+  if (search) {
+    const matcher = new RegExp(escapeRegex(search.trim()), "i");
+    query.$or = [
+      { name: matcher }, { description: matcher },
+      { shortDescription: matcher }, { tags: { $in: [matcher] } },
+    ];
+  }
+  const sortObj = { [sortBy]: sortOrder === "asc" ? 1 : -1 };
+  const [services, totalServices] = await Promise.all([
+    Service.find(query).sort(sortObj).skip((page - 1) * limit).limit(limit).lean(),
+    Service.countDocuments(query),
+  ]);
+  const totalPages = Math.ceil(totalServices / limit);
+  return { services, totalServices, page, limit, totalPages,
+    hasNextPage: page < totalPages, hasPrevPage: page > 1 };
+}
+
+const getCachedServices = createPublicContentCache("public-services-v1", "public-services", loadServices);
+
 // GET /api/services - Get all services
 export async function GET(request) {
   try {
-    await connectDB();
-
     const { searchParams } = new URL(request.url);
     const page = safeInteger(searchParams.get("page"), 1);
     const limit = Math.min(safeInteger(searchParams.get("limit"), 12), MAX_LIMIT);
@@ -37,59 +61,35 @@ export async function GET(request) {
     const session = await getServerSession(authOptions);
     const isAdmin = session && session.user.role === "admin";
 
-    // Build query - admin can see all services, others only active
-    const query = isAdmin ? {} : { isActive: true };
-
-    if (category) {
-      query.category = category;
+    const options = { page, limit, category, subcategory, popular, search, sortBy, sortOrder };
+    let data;
+    if (isAdmin) {
+      await connectDB();
+      const query = {};
+      if (category) query.category = category;
+      if (subcategory) query.subcategory = subcategory;
+      if (popular === "true") query.isPopular = true;
+      if (search) {
+        const matcher = new RegExp(escapeRegex(search.trim()), "i");
+        query.$or = [
+          { name: matcher }, { description: matcher },
+          { shortDescription: matcher }, { tags: { $in: [matcher] } },
+        ];
+      }
+      const sortObj = { [sortBy]: sortOrder === "asc" ? 1 : -1 };
+      const [services, totalServices] = await Promise.all([
+        Service.find(query).sort(sortObj).skip((page - 1) * limit).limit(limit).lean(),
+        Service.countDocuments(query),
+      ]);
+      const totalPages = Math.ceil(totalServices / limit);
+      data = { services, totalServices, page, limit, totalPages,
+        hasNextPage: page < totalPages, hasPrevPage: page > 1 };
+    } else {
+      data = await getCachedServices(options);
     }
-
-    if (subcategory) {
-      query.subcategory = subcategory;
-    }
-
-    if (popular === "true") {
-      query.isPopular = true;
-    }
-
-    if (search) {
-      const matcher = new RegExp(escapeRegex(search.trim()), "i");
-      query.$or = [
-        { name: matcher },
-        { description: matcher },
-        { shortDescription: matcher },
-        { tags: { $in: [matcher] } },
-      ];
-    }
-
-    // Build sort object
-    const sortObj = {};
-    sortObj[sortBy] = sortOrder === "asc" ? 1 : -1;
-
-    // Calculate skip
-    const skip = (page - 1) * limit;
-
-    // Execute query
-    const [services, total] = await Promise.all([
-      Service.find(query).sort(sortObj).skip(skip).limit(limit).lean(),
-      Service.countDocuments(query),
-    ]);
-
-    // Calculate pagination info
-    const totalPages = Math.ceil(total / limit);
-    const hasNextPage = page < totalPages;
-    const hasPrevPage = page > 1;
 
     return NextResponse.json(
-      {
-        services,
-        totalServices: total,
-        page,
-        limit,
-        totalPages,
-        hasNextPage,
-        hasPrevPage,
-      },
+      data,
       { headers: { "Cache-Control": "no-store" } }
     );
   } catch (error) {
@@ -138,6 +138,7 @@ export async function POST(request) {
 
     const service = new Service(validation.value);
     await service.save();
+    invalidatePublicContent("public-services");
 
     return NextResponse.json(
       {

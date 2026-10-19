@@ -4,6 +4,7 @@ import Service from "@/models/Service.js";
 import { serviceValidation } from "@/lib/validations.js";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.js";
+import { invalidatePublicContent } from "@/lib/content-cache.js";
 
 // GET /api/services/[id] - Get single service
 export async function GET(request, { params }) {
@@ -84,6 +85,8 @@ export async function PUT(request, { params }) {
       );
     }
 
+    invalidatePublicContent("public-services");
+
     return NextResponse.json({
       success: true,
       message: "Service updated successfully",
@@ -121,6 +124,8 @@ export async function DELETE(request, { params }) {
         { status: 404 }
       );
     }
+
+    invalidatePublicContent("public-services");
 
     return NextResponse.json({
       success: true,

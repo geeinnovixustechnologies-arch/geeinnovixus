@@ -8,6 +8,7 @@ import {
   getGoogleDriveImageProxyUrl,
   getGoogleDriveImageUrl,
 } from "@/lib/google-drive-image-url.js";
+import { invalidatePublicContent } from "@/lib/content-cache.js";
 
 export async function PATCH(request, { params }) {
   try {
@@ -66,6 +67,7 @@ export async function PATCH(request, { params }) {
     if (!image) {
       return NextResponse.json({ message: "Gallery image not found" }, { status: 404 });
     }
+    invalidatePublicContent("public-gallery");
     const result = image.toObject();
     result.displayUrl = getGoogleDriveImageProxyUrl(result.url);
     return NextResponse.json({ image: result });
@@ -99,6 +101,7 @@ export async function DELETE(_request, { params }) {
     }
 
     await GalleryImage.findByIdAndDelete(id);
+    invalidatePublicContent("public-gallery");
     return NextResponse.json({ success: true, message: "Gallery entry removed" });
   } catch (error) {
     console.error("Error deleting gallery image:", error);

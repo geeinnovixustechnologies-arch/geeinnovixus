@@ -211,7 +211,7 @@ export default function AdminLearningHubPage() {
             <h1 className="mt-1 text-3xl font-bold text-slate-950">Learning Hub</h1>
             <p className="mt-2 text-slate-600">Manage courses, training, and workshops in one course-style catalog.</p>
           </div>
-          <Link href="/learning-hub" className="font-medium text-blue-700 hover:text-blue-900">View public hub</Link>
+          <Link href="/learning-hub" target="_blank" rel="noopener noreferrer" className="font-medium text-blue-700 hover:text-blue-900">Preview as visitor ↗</Link>
         </div>
 
         {error && <p role="alert" className="mb-5 rounded-lg border border-red-200 bg-red-50 p-3 text-red-800">{error}</p>}
@@ -286,6 +286,11 @@ export default function AdminLearningHubPage() {
                 </div>
                 <p className="mt-3 text-sm leading-6 text-slate-700">{offering.shortDescription}</p>
                 <div className="mt-4 flex flex-wrap gap-2">
+                  {offering.isActive && (
+                    <Link href={`/learning-hub/${offering._id}`} target="_blank" rel="noopener noreferrer" className="rounded-md bg-blue-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-blue-800">
+                      Preview as visitor
+                    </Link>
+                  )}
                   <button type="button" onClick={() => beginEdit(offering)} className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Edit</button>
                   <button type="button" onClick={() => toggleActive(offering)} className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
                     {offering.isActive ? "Deactivate" : "Reactivate"}

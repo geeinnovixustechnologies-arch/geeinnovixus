@@ -76,17 +76,18 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="border-t border-slate-800 bg-slate-950 text-white">
       {showScrollTop && (
         <button
           onClick={scrollToTop}
+          aria-label="Scroll back to top"
           className="fixed bottom-6 right-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 rounded-full shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 z-50"
         >
           <ArrowUp className="h-5 w-5" />
         </button>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center mb-4">

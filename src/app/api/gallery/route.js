@@ -7,6 +7,7 @@ import {
   getGoogleDriveImageProxyUrl,
   getGoogleDriveImageUrl,
 } from "@/lib/google-drive-image-url.js";
+import { createPublicContentCache, invalidatePublicContent } from "@/lib/content-cache.js";
 
 const MAX_LIMIT = 100;
 
@@ -15,9 +16,32 @@ function positiveInteger(value, fallback) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+async function loadPublicGallery({ page, limit }) {
+  await connectDB();
+  const query = { isActive: true };
+  const [images, total] = await Promise.all([
+    GalleryImage.find(query).select("-postedBy").sort({ createdAt: -1 })
+      .skip((page - 1) * limit).limit(limit).lean(),
+    GalleryImage.countDocuments(query),
+  ]);
+  return {
+    images: images.map((image) => ({
+      ...image,
+      displayUrl: getGoogleDriveImageProxyUrl(image.url),
+    })),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
+}
+
+const getCachedPublicGallery = createPublicContentCache(
+  "public-gallery-v1", "public-gallery", loadPublicGallery
+);
+
 export async function GET(request) {
   try {
-    await connectDB();
     const session = await getServerSession(authOptions);
     const { searchParams } = new URL(request.url);
     const includeInactive =
@@ -28,28 +52,28 @@ export async function GET(request) {
       positiveInteger(searchParams.get("limit"), 24),
       MAX_LIMIT
     );
-    const query = includeInactive ? {} : { isActive: true };
-    const [images, total] = await Promise.all([
-      GalleryImage.find(query)
-        .select("-postedBy")
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .lean(),
-      GalleryImage.countDocuments(query),
-    ]);
-
-    return NextResponse.json(
-      {
+    let data;
+    if (!includeInactive && session?.user?.role !== "admin") {
+      data = await getCachedPublicGallery({ page, limit });
+    } else {
+      await connectDB();
+      const query = includeInactive ? {} : { isActive: true };
+      const [images, total] = await Promise.all([
+        GalleryImage.find(query).select("-postedBy").sort({ createdAt: -1 })
+          .skip((page - 1) * limit).limit(limit).lean(),
+        GalleryImage.countDocuments(query),
+      ]);
+      data = {
         images: images.map((image) => ({
           ...image,
           displayUrl: getGoogleDriveImageProxyUrl(image.url),
         })),
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
+        total, page, limit, totalPages: Math.ceil(total / limit),
+      };
+    }
+
+    return NextResponse.json(
+      data,
       { headers: { "Cache-Control": "no-store" } }
     );
   } catch (error) {
@@ -115,6 +139,7 @@ export async function POST(request) {
       postedBy: session.user.id,
       isActive: true,
     });
+    invalidatePublicContent("public-gallery");
     const publicImage = image.toObject();
     delete publicImage.postedBy;
     publicImage.displayUrl = getGoogleDriveImageProxyUrl(publicImage.url);
