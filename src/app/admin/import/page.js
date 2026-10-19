@@ -14,7 +14,6 @@ import {
   Database,
   Users,
   Briefcase,
-  Star,
   BarChart3,
   RefreshCw,
 } from "lucide-react";
@@ -88,23 +87,6 @@ export default function AdminImportPage() {
         "processSteps",
         "requirements",
         "tags",
-      ],
-    },
-    {
-      value: "testimonials",
-      label: "Testimonials",
-      description: "Import client testimonials and reviews",
-      icon: Star,
-      color: "bg-yellow-100 text-yellow-800",
-      fields: [
-        "clientName",
-        "clientTitle",
-        "clientCompany",
-        "projectTitle",
-        "rating",
-        "review",
-        "isApproved",
-        "isFeatured",
       ],
     },
     {

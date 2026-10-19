@@ -41,6 +41,7 @@ import { MagicCard } from "@/components/ui/magic-card";
 export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedDomain, setSelectedDomain] = useState("all");
@@ -89,120 +90,24 @@ export default function ProjectsPage() {
     { value: "rating.average", label: "Highest Rated" },
   ];
 
-  // Mock data for demonstration
-  const mockProjects = [
-    {
-      _id: "1",
-      title: "AI-Powered Medical Diagnosis System",
-      shortDescription:
-        "Advanced machine learning system for medical image analysis and diagnosis assistance.",
-      category: "AI/ML",
-      domain: [
-        "Artificial Intelligence",
-        "Machine Learning",
-        "Computer Vision",
-      ],
-      technologies: ["Python", "TensorFlow", "OpenCV", "React"],
-      pricing: {
-        basePrice: 2500,
-        currency: "USD",
-        isOnSale: true,
-        discountedPrice: 2000,
-      },
-      difficulty: "advanced",
-      estimatedTime: "8-12 weeks",
-      images: [
-        { url: "/api/placeholder/400/300", alt: "AI Medical Diagnosis" },
-      ],
-      demoUrl: "https://demo.example.com",
-      downloadUrl: "https://download.example.com",
-      features: [
-        "Real-time diagnosis",
-        "Multi-modal analysis",
-        "Cloud integration",
-      ],
-      views: 1250,
-      rating: { average: 4.8, count: 45 },
-      tags: ["healthcare", "ai", "medical", "diagnosis"],
-      createdAt: "2024-01-15",
-    },
-    {
-      _id: "2",
-      title: "Blockchain Voting System",
-      shortDescription:
-        "Secure and transparent voting system built on blockchain technology.",
-      category: "Blockchain",
-      domain: ["Blockchain", "Web3", "Full Stack"],
-      technologies: ["Solidity", "Web3.js", "React", "Node.js"],
-      pricing: { basePrice: 1800, currency: "USD" },
-      difficulty: "intermediate",
-      estimatedTime: "6-8 weeks",
-      images: [{ url: "/api/placeholder/400/300", alt: "Blockchain Voting" }],
-      demoUrl: "https://demo.example.com",
-      downloadUrl: "https://download.example.com",
-      features: ["Secure voting", "Transparent results", "Smart contracts"],
-      views: 980,
-      rating: { average: 4.6, count: 32 },
-      tags: ["blockchain", "voting", "security", "democracy"],
-      createdAt: "2024-01-10",
-    },
-    {
-      _id: "3",
-      title: "E-Commerce Platform with AI Recommendations",
-      shortDescription:
-        "Modern e-commerce platform with AI-powered product recommendations.",
-      category: "Web Development",
-      domain: ["Full Stack", "Artificial Intelligence"],
-      technologies: ["React", "Node.js", "MongoDB", "Python", "TensorFlow"],
-      pricing: {
-        basePrice: 3200,
-        currency: "USD",
-        isOnSale: true,
-        discountedPrice: 2800,
-      },
-      difficulty: "advanced",
-      estimatedTime: "10-14 weeks",
-      images: [{ url: "/api/placeholder/400/300", alt: "E-Commerce Platform" }],
-      demoUrl: "https://demo.example.com",
-      downloadUrl: "https://download.example.com",
-      features: [
-        "AI recommendations",
-        "Payment integration",
-        "Admin dashboard",
-      ],
-      views: 2100,
-      rating: { average: 4.9, count: 67 },
-      tags: ["ecommerce", "ai", "recommendations", "fullstack"],
-      createdAt: "2024-01-05",
-    },
-  ];
-
-  // useEffect(() => {
-  //   // Simulate API call
-  //   const fetchProjects = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const response = await fetch("/api/projects");
-  //       const data = await response.json();
-  //       setProjects(data.projects || []);
-  //     } catch (error) {
-  //       console.error("Error fetching projects:", error);
-  //       // Fallback to mock data
-  //       setProjects(mockProjects);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchProjects();
-  // }, [
-  //   searchTerm,
-  //   selectedCategory,
-  //   selectedDomain,
-  //   selectedDifficulty,
-  //   sortBy,
-  //   sortOrder,
-  // ]);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/projects", { cache: "no-store", signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Projects could not be loaded.");
+        const data = await response.json();
+        setProjects(Array.isArray(data.projects) ? data.projects : []);
+      })
+      .catch((fetchError) => {
+        if (fetchError.name !== "AbortError") {
+          setError("Projects could not be loaded. Please try again later.");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, []);
 
   const filteredProjects = projects.filter((project) => {
     const matchesSearch =
@@ -494,6 +399,10 @@ export default function ProjectsPage() {
                 </div>
               ))}
             </div>
+          ) : error ? (
+            <p role="alert" className="py-16 text-center text-red-700">
+              {error}
+            </p>
           ) : (
             <>
               <div className="flex justify-between items-center mb-8">
@@ -541,16 +450,17 @@ export default function ProjectsPage() {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+                <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
                   {filteredProjects.map((project, index) => (
                     <motion.div
                       key={project._id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
+                      className="h-fit"
                     >
                       <MagicCard
-                        className="h-full p-6 bg-white/80 backdrop-blur-sm border border-gray-200/50"
+                        className="h-fit border border-gray-200/50 bg-white/80 p-6 backdrop-blur-sm"
                         gradientColor="rgba(59, 130, 246, 0.1)"
                         borderColor="rgba(59, 130, 246, 0.2)"
                         spotlightColor="rgba(59, 130, 246, 0.1)"
@@ -598,11 +508,11 @@ export default function ProjectsPage() {
 
                         {/* Project Content */}
                         <div className="space-y-4">
-                          <div className="flex items-center justify-between mb-1">
-                            <Badge variant="secondary">
+                          <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+                            <Badge variant="secondary" className="max-w-full whitespace-normal break-words">
                               {project.category}
                             </Badge>
-                            <div className="flex items-center">
+                            <div className="flex shrink-0 items-center">
                               <Star className="h-4 w-4 text-yellow-400 fill-current" />
                               <span className="ml-1 text-sm text-gray-600">
                                 {project.rating.average} ({project.rating.count}
@@ -611,11 +521,11 @@ export default function ProjectsPage() {
                             </div>
                           </div>
 
-                          <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                          <h3 className="mb-1 break-words text-lg font-semibold text-gray-900">
                             {project.title}
                           </h3>
 
-                          <p className="text-gray-600 mb-2 line-clamp-2 text-sm">
+                          <p className="mb-2 break-words text-sm text-gray-600">
                             {project.shortDescription}
                           </p>
 
@@ -625,7 +535,7 @@ export default function ProjectsPage() {
                               <Badge
                                 key={tech}
                                 variant="outline"
-                                className="text-xs"
+                                className="max-w-full whitespace-normal break-words text-xs"
                               >
                                 {tech}
                               </Badge>

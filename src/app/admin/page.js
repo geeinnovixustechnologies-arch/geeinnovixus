@@ -8,17 +8,11 @@ import {
   Briefcase,
   FileText,
   MessageSquare,
-  DollarSign,
-  TrendingUp,
-  Eye,
-  Star,
-  Calendar,
-  Download,
-  Upload,
-  Settings,
-  BarChart3,
-  PieChart,
   Activity,
+  Search,
+  BookOpen,
+  Images,
+  Award,
 } from "lucide-react";
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
@@ -28,82 +22,46 @@ export default function AdminDashboard() {
   const { data: session, status } = useSession();
   const [stats, setStats] = useState({
     totalProjects: 0,
-    totalAccessRequests: 0,
-    totalRevenue: 0,
     totalClients: 0,
     pendingInquiries: 0,
-    pendingAccessRequests: 0,
-    monthlyRevenue: 0,
-    clientSatisfaction: 0,
   });
 
   const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState("");
 
   useEffect(() => {
-    if (status === "authenticated" && session?.user?.role === "admin") {
-      fetchDashboardData();
-    }
-  }, [session, status]);
-
-  const fetchDashboardData = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("/api/admin/dashboard");
-      const data = await response.json();
-
-      if (response.ok) {
+    if (status !== "authenticated" || session?.user?.role !== "admin") return;
+    let active = true;
+    fetch("/api/admin/dashboard", { cache: "no-store" })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Dashboard data unavailable.");
+        if (!active) return;
         setStats({
           totalProjects: data.stats.totalProjects,
-          totalAccessRequests: data.stats.totalAccessRequests,
-          totalRevenue: data.stats.totalRevenue,
           totalClients: data.stats.totalUsers,
           pendingInquiries: data.stats.pendingInquiries,
-          pendingAccessRequests: data.stats.pendingAccessRequests,
-          monthlyRevenue: data.stats.monthlyRevenue,
-          clientSatisfaction: data.stats.clientSatisfaction,
         });
-
-        // Format recent activity timestamps
-        const formattedActivity = data.recentActivity.map((activity) => ({
-          ...activity,
-          timestamp: new Date(activity.timestamp).toLocaleString(),
-        }));
-
-        setRecentActivity(formattedActivity);
-      } else {
-        console.error("Error fetching dashboard data:", data.message);
-        // Fallback to mock data
-        setStats({
-          totalProjects: 0,
-          totalAccessRequests: 0,
-          totalRevenue: 0,
-          totalClients: 0,
-          pendingInquiries: 0,
-          pendingAccessRequests: 0,
-          monthlyRevenue: 0,
-          clientSatisfaction: 0,
-        });
-        setRecentActivity([]);
-      }
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error);
-      // Fallback to mock data
-      setStats({
-        totalProjects: 0,
-        totalAccessRequests: 0,
-        totalRevenue: 0,
-        totalClients: 0,
-        pendingInquiries: 0,
-        pendingAccessRequests: 0,
-        monthlyRevenue: 0,
-        clientSatisfaction: 0,
+        setRecentActivity(
+          data.recentActivity
+            .map((activity) => ({
+              ...activity,
+              timestamp: new Date(activity.timestamp).toLocaleString(),
+            }))
+        );
+      })
+      .catch((error) => {
+        console.error("Error fetching dashboard data:", error);
+        if (active) setDashboardError("Dashboard data could not be loaded.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
       });
-      setRecentActivity([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    return () => {
+      active = false;
+    };
+  }, [session, status]);
 
   if (status === "loading") {
     return (
@@ -140,74 +98,71 @@ export default function AdminDashboard() {
       value: stats.totalProjects,
       icon: Briefcase,
       color: "from-blue-500 to-blue-600",
-      change: "+12%",
-      changeType: "positive",
-    },
-    {
-      title: "Access Requests",
-      value: stats.totalAccessRequests,
-      icon: FileText,
-      color: "from-green-500 to-green-600",
-      change: "+8%",
-      changeType: "positive",
-    },
-    {
-      title: "Total Revenue",
-      value: `$${stats.totalRevenue.toLocaleString()}`,
-      icon: DollarSign,
-      color: "from-purple-500 to-purple-600",
-      change: "+15%",
-      changeType: "positive",
     },
     {
       title: "Total Clients",
       value: stats.totalClients,
       icon: Users,
       color: "from-orange-500 to-orange-600",
-      change: "+5%",
-      changeType: "positive",
     },
   ];
 
-  const quickActions = [
+  const adminDestinations = [
     {
-      title: "Add New Project",
-      description: "Create a new project listing",
+      title: "Dashboard",
+      description: "Review site activity and key totals",
+      icon: Activity,
+      href: "/admin",
+      color: "bg-slate-500 hover:bg-slate-600",
+    },
+    {
+      title: "R & D",
+      description: "Manage research and development content",
+      icon: Search,
+      href: "/admin/research",
+      color: "bg-indigo-500 hover:bg-indigo-600",
+    },
+    {
+      title: "Projects",
+      description: "Manage published project listings",
       icon: Briefcase,
-      href: "/admin/projects/new",
+      href: "/admin/projects",
       color: "bg-blue-500 hover:bg-blue-600",
     },
     {
-      title: "Manage Access Requests",
-      description: "View and manage access requests",
+      title: "Services",
+      description: "Manage published services",
       icon: FileText,
-      href: "/admin/access-requests",
-      color: "bg-green-500 hover:bg-green-600",
+      href: "/admin/services",
+      color: "bg-cyan-500 hover:bg-cyan-600",
     },
     {
-      title: "View Inquiries",
-      description: "Respond to client inquiries",
-      icon: MessageSquare,
-      href: "/admin/inquiries",
-      color: "bg-purple-500 hover:bg-purple-600",
+      title: "Learning Hub",
+      description: "Manage courses and training",
+      icon: BookOpen,
+      href: "/admin/learning-hub",
+      color: "bg-violet-500 hover:bg-violet-600",
     },
     {
-      title: "Import Data",
-      description: "Import projects from Excel",
-      icon: Upload,
-      href: "/admin/import",
-      color: "bg-orange-500 hover:bg-orange-600",
+      title: "Gallery",
+      description: "Manage public gallery entries",
+      icon: Images,
+      href: "/admin/gallery",
+      color: "bg-pink-500 hover:bg-pink-600",
+    },
+    {
+      title: "Certificate Generation",
+      description: "Create a mock certificate preview",
+      icon: Award,
+      href: "/admin/certificates",
+      color: "bg-amber-500 hover:bg-amber-600",
     },
   ];
 
   const getActivityIcon = (type) => {
     switch (type) {
-      case "access_request":
-        return FileText;
       case "inquiry":
         return MessageSquare;
-      case "testimonial":
-        return Star;
       case "project":
         return Briefcase;
       default:
@@ -217,12 +172,8 @@ export default function AdminDashboard() {
 
   const getActivityColor = (type) => {
     switch (type) {
-      case "access_request":
-        return "text-green-600 bg-green-100";
       case "inquiry":
         return "text-blue-600 bg-blue-100";
-      case "testimonial":
-        return "text-yellow-600 bg-yellow-100";
       case "project":
         return "text-purple-600 bg-purple-100";
       default:
@@ -259,8 +210,14 @@ export default function AdminDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {loading && <p role="status" className="mb-6 text-gray-600">Loading dashboard…</p>}
+        {dashboardError && (
+          <p role="alert" className="mb-6 rounded-lg border border-red-200 bg-red-50 p-3 text-red-800">
+            {dashboardError}
+          </p>
+        )}
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {statCards.map((stat, index) => (
             <motion.div
               key={stat.title}
@@ -281,20 +238,6 @@ export default function AdminDashboard() {
                       stat.value
                     )}
                   </div>
-                  <div className="flex items-center mt-2">
-                    <span
-                      className={`text-sm font-medium ${
-                        stat.changeType === "positive"
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
-                    >
-                      {stat.change}
-                    </span>
-                    <span className="text-sm text-gray-500 ml-1">
-                      from last month
-                    </span>
-                  </div>
                 </div>
                 <div
                   className={`p-3 rounded-lg bg-gradient-to-r ${stat.color}`}
@@ -306,35 +249,39 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Quick Actions */}
-          <div className="lg:col-span-1">
+        <div className="space-y-8">
+          {/* Admin destinations */}
+          <section aria-labelledby="admin-destinations-heading">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
               className="bg-white rounded-xl shadow-lg p-6"
             >
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">
-                Quick Actions
+              <h2
+                id="admin-destinations-heading"
+                className="text-xl font-semibold text-gray-900 mb-6"
+              >
+                Admin destinations
               </h2>
-              <div className="space-y-4">
-                {quickActions.map((action, index) => (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {adminDestinations.map((destination) => (
                   <Link
-                    key={action.title}
-                    href={action.href}
-                    className="block p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+                    key={destination.title}
+                    href={destination.href}
+                    aria-current={destination.href === "/admin" ? "page" : undefined}
+                    className="block rounded-lg border border-gray-200 p-4 transition-colors hover:border-blue-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
                   >
                     <div className="flex items-center">
-                      <div className={`p-2 rounded-lg ${action.color} mr-4`}>
-                        <action.icon className="h-5 w-5 text-white" />
+                      <div className={`mr-4 rounded-lg p-2 ${destination.color}`}>
+                        <destination.icon className="h-5 w-5 text-white" />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <h3 className="font-medium text-gray-900">
-                          {action.title}
+                          {destination.title}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          {action.description}
+                          {destination.description}
                         </p>
                       </div>
                     </div>
@@ -342,10 +289,10 @@ export default function AdminDashboard() {
                 ))}
               </div>
             </motion.div>
-          </div>
+          </section>
 
           {/* Recent Activity */}
-          <div className="lg:col-span-2">
+          <section aria-labelledby="recent-activity-heading">
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -353,15 +300,9 @@ export default function AdminDashboard() {
               className="bg-white rounded-xl shadow-lg p-6"
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 id="recent-activity-heading" className="text-xl font-semibold text-gray-900">
                   Recent Activity
                 </h2>
-                <Link
-                  href="/admin/activity"
-                  className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                >
-                  View all
-                </Link>
               </div>
 
               <div className="space-y-4">
@@ -378,7 +319,16 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                     ))
-                  : recentActivity.map((activity) => {
+                  : dashboardError ? (
+                    <p className="py-6 text-center text-sm text-red-700">
+                      Recent activity could not be loaded.
+                    </p>
+                  )
+                  : recentActivity.length === 0 ? (
+                    <p className="py-6 text-center text-sm text-gray-600">
+                      No recent activity.
+                    </p>
+                  ) : recentActivity.map((activity) => {
                       const Icon = getActivityIcon(activity.type);
                       return (
                         <div
@@ -413,11 +363,11 @@ export default function AdminDashboard() {
                     })}
               </div>
             </motion.div>
-          </div>
+          </section>
         </div>
 
         {/* Additional Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+        <div className="grid grid-cols-1 gap-6 mt-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -438,52 +388,6 @@ export default function AdminDashboard() {
                 </p>
               </div>
               <MessageSquare className="h-8 w-8 text-blue-500" />
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="bg-white rounded-xl shadow-lg p-6"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Pending Access Requests
-                </p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {loading ? (
-                    <div className="animate-pulse bg-gray-200 h-8 w-12 rounded"></div>
-                  ) : (
-                    stats.pendingAccessRequests
-                  )}
-                </p>
-              </div>
-              <FileText className="h-8 w-8 text-green-500" />
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="bg-white rounded-xl shadow-lg p-6"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Client Satisfaction
-                </p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {loading ? (
-                    <div className="animate-pulse bg-gray-200 h-8 w-12 rounded"></div>
-                  ) : (
-                    `${stats.clientSatisfaction}/5`
-                  )}
-                </p>
-              </div>
-              <Star className="h-8 w-8 text-yellow-500" />
             </div>
           </motion.div>
         </div>

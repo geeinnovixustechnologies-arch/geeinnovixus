@@ -19,6 +19,10 @@ const userSchema = new mongoose.Schema(
         "Please enter a valid email",
       ],
     },
+    passwordHash: {
+      type: String,
+      select: false,
+    },
     phone: {
       type: String,
       trim: true,
@@ -59,7 +63,14 @@ const userSchema = new mongoose.Schema(
 );
 
 // Index for better query performance
-userSchema.index({ role: 1 });
+userSchema.index(
+  { role: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { role: "admin" },
+    name: "unique_single_admin",
+  }
+);
 userSchema.index({ isActive: 1 });
 
 // Virtual for user's full profile

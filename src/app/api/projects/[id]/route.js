@@ -30,15 +30,18 @@ export async function GET(request, { params }) {
       $inc: { views: 1 },
     });
 
-    return NextResponse.json({
-      success: true,
-      data: project,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        data: project,
+      },
+      { headers: { "Cache-Control": "no-store" } }
+    );
   } catch (error) {
     console.error("Error fetching project:", error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch project" },
-      { status: 500 }
+      { status: 500, headers: { "Cache-Control": "no-store" } }
     );
   }
 }
@@ -63,19 +66,25 @@ export async function PUT(request, { params }) {
     const body = await request.json();
 
     // Validate data
-    const validation = projectValidation.update.validate(body);
-    if (!validation.isValid) {
+    const validation = projectValidation.update.validate(body, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
+    if (validation.error || Object.keys(validation.value || {}).length === 0) {
       return NextResponse.json(
         {
           success: false,
           message: "Validation failed",
-          errors: validation.errors,
+          errors: validation.error?.details.map((detail) => ({
+            field: detail.path.join("."),
+            message: detail.message,
+          })) || [{ message: "At least one supported field is required." }],
         },
         { status: 400 }
       );
     }
 
-    const project = await Project.findByIdAndUpdate(id, validation.data, {
+    const project = await Project.findByIdAndUpdate(id, validation.value, {
       new: true,
       runValidators: true,
     });

@@ -4,68 +4,6 @@ import AccessRequest from "@/models/AccessRequest.js";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.js";
 
-// GET /api/access-requests - Get access requests (Admin only)
-export async function GET(request) {
-  try {
-    const session = await getServerSession(authOptions);
-
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    await connectDB();
-
-    const { searchParams } = new URL(request.url);
-    const status = searchParams.get("status");
-    const page = parseInt(searchParams.get("page")) || 1;
-    const limit = parseInt(searchParams.get("limit")) || 10;
-    const skip = (page - 1) * limit;
-
-    // Build query
-    const query = {};
-    if (status && status !== "all") {
-      query.status = status;
-    }
-
-    // Get access requests with populated user and project data
-    const accessRequests = await AccessRequest.find(query)
-      .populate("user", "name email")
-      .populate("project", "title category pricing")
-      .populate("approvedBy", "name")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean();
-
-    const totalRequests = await AccessRequest.countDocuments(query);
-    const totalPages = Math.ceil(totalRequests / limit);
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        accessRequests,
-        pagination: {
-          page,
-          limit,
-          totalRequests,
-          totalPages,
-          hasNextPage: page < totalPages,
-          hasPrevPage: page > 1,
-        },
-      },
-    });
-  } catch (error) {
-    console.error("Error fetching access requests:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to fetch access requests" },
-      { status: 500 }
-    );
-  }
-}
-
 // POST /api/access-requests - Create new access request
 export async function POST(request) {
   try {

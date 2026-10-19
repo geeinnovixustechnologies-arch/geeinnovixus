@@ -12,7 +12,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Filter, Star, Clock, Tag } from "lucide-react";
+import {
+  Search,
+  Filter,
+  Star,
+  Clock,
+  Tag,
+  Briefcase,
+  BookOpen,
+  PenTool,
+  Users,
+  GraduationCap,
+  Headphones,
+} from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -22,181 +34,60 @@ import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { GridPattern } from "@/components/ui/grid-pattern";
 import { MagicCard } from "@/components/ui/magic-card";
 
+const serviceIcons = {
+  briefcase: Briefcase,
+  book: BookOpen,
+  "pen-tool": PenTool,
+  users: Users,
+  "graduation-cap": GraduationCap,
+  headphones: Headphones,
+};
+
 export default function ServicesPage() {
   const [services, setServices] = useState([]);
-  const [filteredServices, setFilteredServices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("popularity");
 
-  // Services offerings only (no engineering domains)
-  const mockServices = useMemo(
-    () => [
-      {
-        _id: "s1",
-        name: "Publication Services",
-        description:
-          "Professional academic writing and publication support for research papers",
-        category: "Publication",
-        subcategory: "Academic Writing",
-        domains: [
-          "Research Paper Writing",
-          "Journal Article Preparation",
-          "Conference Paper Writing",
-          "Literature Review",
-          "Data Analysis & Interpretation",
-          "Peer Review Support",
-        ],
-        features: ["IEEE/APA Formatting", "Plagiarism Check", "Citations"],
-        deliveryTime: "2-4 weeks",
-        popularity: 95,
-        rating: 4.8,
-        icon: "📝",
-        color: "primary",
-      },
-      {
-        _id: "s2",
-        name: "Patent Services",
-        description:
-          "Complete patent filing and intellectual property protection services",
-        category: "Patent",
-        subcategory: "IP",
-        domains: [
-          "Patent Drafting",
-          "Patent Filing",
-          "Patent Search",
-          "Prior Art Search",
-          "Patent Analysis",
-        ],
-        features: ["USPTO Filing", "International Patents"],
-        deliveryTime: "4-8 weeks",
-        popularity: 88,
-        rating: 4.7,
-        icon: "⚖️",
-        color: "secondary",
-      },
-      {
-        _id: "s3",
-        name: "Plagiarism Checker",
-        description:
-          "Advanced plagiarism detection and similarity analysis for academic work",
-        category: "Quality Assurance",
-        subcategory: "Research Support",
-        domains: [
-          "Plagiarism Detection",
-          "Similarity Analysis",
-          "Citation Verification",
-          "Originality Reports",
-        ],
-        features: ["Multiple Databases", "Detailed Reports"],
-        deliveryTime: "1-2 days",
-        popularity: 92,
-        rating: 4.9,
-        icon: "🔍",
-        color: "success",
-      },
-      {
-        _id: "s4",
-        name: "Manuscript Preparation",
-        description:
-          "Professional manuscript preparation and journal submission support",
-        category: "Writing",
-        subcategory: "Academic Support",
-        domains: [
-          "Paper Structure",
-          "Abstract & Conclusion",
-          "Methodology",
-          "Results & Discussion",
-          "Journal Guidelines",
-        ],
-        features: ["Multiple Formats", "Expert Review", "Revisions"],
-        deliveryTime: "3-6 weeks",
-        popularity: 90,
-        rating: 4.8,
-        icon: "📄",
-        color: "warning",
-      },
-      {
-        _id: "s5",
-        name: "PhD Assistance",
-        description: "Comprehensive PhD research support and guidance",
-        category: "Academic Support",
-        subcategory: "Research Guidance",
-        domains: [
-          "Thesis Writing",
-          "Research Proposal",
-          "Literature Review",
-          "Data Collection Support",
-          "Statistical Analysis",
-          "Viva Preparation",
-        ],
-        features: ["Mentoring", "Progress Tracking", "Deadlines"],
-        deliveryTime: "6-12 months",
-        popularity: 85,
-        rating: 4.6,
-        icon: "🎓",
-        color: "primary",
-      },
-      {
-        _id: "s6",
-        name: "Prototyping Services",
-        description: "Rapid prototyping and product development support",
-        category: "Development",
-        subcategory: "Product Design",
-        domains: [
-          "3D Prototyping",
-          "CAD Design",
-          "Material Selection",
-          "Testing & Validation",
-          "Iterative Design",
-        ],
-        features: ["Fast Turnaround", "Quality Testing"],
-        deliveryTime: "2-4 weeks",
-        popularity: 82,
-        rating: 4.7,
-        icon: "🔧",
-        color: "success",
-      },
-    ],
-    []
-  );
-
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setServices(mockServices);
-      setFilteredServices(mockServices);
-      setLoading(false);
-    }, 1000);
-  }, [mockServices]);
+    const controller = new AbortController();
+    fetch("/api/services?limit=100", {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Services could not be loaded.");
+        const data = await response.json();
+        setServices(Array.isArray(data.services) ? data.services : []);
+      })
+      .catch((fetchError) => {
+        if (fetchError.name !== "AbortError") {
+          setError("Services could not be loaded. Please try again later.");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, []);
 
-  useEffect(() => {
-    let filtered = services;
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (service) =>
-          service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          service.description.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Filter by category
-    if (selectedCategory !== "all") {
-      filtered = filtered.filter(
-        (service) => service.category === selectedCategory
-      );
-    }
-
-    // Sort services
-    filtered.sort((a, b) => {
+  const filteredServices = useMemo(() => {
+    const query = searchTerm.toLowerCase();
+    const filtered = services.filter((service) => {
+      const matchesSearch =
+        !query ||
+        service.name.toLowerCase().includes(query) ||
+        service.description.toLowerCase().includes(query);
+      return matchesSearch && (selectedCategory === "all" || service.category === selectedCategory);
+    });
+    return filtered.sort((a, b) => {
       switch (sortBy) {
         case "popularity":
-          return b.popularity - a.popularity;
+          return (b.orderCount || 0) - (a.orderCount || 0);
         case "rating":
-          return b.rating - a.rating;
+          return (b.rating?.average || 0) - (a.rating?.average || 0);
         case "name":
           return a.name.localeCompare(b.name);
         case "delivery":
@@ -205,8 +96,6 @@ export default function ServicesPage() {
           return 0;
       }
     });
-
-    setFilteredServices(filtered);
   }, [services, searchTerm, selectedCategory, sortBy]);
 
   const categories = [
@@ -376,85 +265,106 @@ export default function ServicesPage() {
       {/* Services Grid */}
       <section className="py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-            {filteredServices.map((service) => (
-              <MagicCard
-                key={service._id}
-                className="h-full p-6 bg-white/80 backdrop-blur-sm border border-gray-200/50"
-                gradientColor="rgba(59, 130, 246, 0.1)"
-                borderColor="rgba(59, 130, 246, 0.2)"
-                spotlightColor="rgba(59, 130, 246, 0.1)"
-              >
-                <div className="flex items-center justify-between w-full mb-4">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-3xl">{service.icon}</span>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {service.name}
-                      </h3>
-                      <Badge variant="secondary" className="mt-1">
-                        {service.category}
-                      </Badge>
+          <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
+            {filteredServices.map((service) => {
+              const Icon =
+                serviceIcons[service.icon?.trim().toLowerCase()] || Briefcase;
+              return (
+                <MagicCard
+                  key={service._id}
+                  className="h-fit min-w-0 border border-gray-200/50 bg-white/80 p-6 backdrop-blur-sm"
+                  gradientColor="rgba(59, 130, 246, 0.1)"
+                  borderColor="rgba(59, 130, 246, 0.2)"
+                  spotlightColor="rgba(59, 130, 246, 0.1)"
+                >
+                  <div className="mb-4 flex w-full items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-start gap-3">
+                      <Icon
+                        aria-hidden="true"
+                        className="mt-1 h-8 w-8 shrink-0 text-blue-600"
+                      />
+                      <div className="min-w-0">
+                        <h3 className="break-words text-lg font-semibold text-gray-900">
+                          {service.name}
+                        </h3>
+                        <Badge
+                          variant="secondary"
+                          className="mt-1 max-w-full whitespace-normal break-words"
+                        >
+                          {service.category}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 items-center space-x-1">
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <span className="text-sm font-medium text-gray-700">
+                        {service.rating?.average ?? 0}
+                      </span>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-1">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm font-medium text-gray-700">
-                      {service.rating}
-                    </span>
+
+                  <p className="mb-4 break-words text-sm text-gray-600">
+                    {service.description}
+                  </p>
+
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center space-x-2">
+                      <Tag aria-hidden="true" className="h-4 w-4 shrink-0 text-blue-600" />
+                      <span className="text-sm text-gray-600 font-medium">
+                        Domains:
+                      </span>
+                    </div>
+                    {formatDomains(service.tags || service.features)}
+
+                    <div className="flex items-center space-x-2">
+                      <Clock aria-hidden="true" className="h-4 w-4 shrink-0 text-blue-600" />
+                      <span className="break-words text-sm text-gray-600">
+                        Delivery: {service.deliveryTime}
+                      </span>
+                    </div>
                   </div>
-                </div>
 
-                <p className="text-gray-600 mb-4 text-sm">
-                  {service.description}
-                </p>
-
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-center space-x-2">
-                    <Tag className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm text-gray-600 font-medium">
-                      Domains:
-                    </span>
+                  <div className="mb-4">
+                    <h4 className="font-semibold mb-2 text-sm text-gray-900">
+                      Key Features:
+                    </h4>
+                    <div className="flex flex-wrap gap-1">
+                      {(service.features || [])
+                        .slice(0, 4)
+                        .map((feature, index) => (
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="max-w-full whitespace-normal break-words text-xs"
+                          >
+                            {feature}
+                          </Badge>
+                        ))}
+                      {(service.features || []).length > 4 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{service.features.length - 4} more
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                  {formatDomains(service.domains)}
 
-                  <div className="flex items-center space-x-2">
-                    <Clock className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm text-gray-600">
-                      Delivery: {service.deliveryTime}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <h4 className="font-semibold mb-2 text-sm text-gray-900">
-                    Key Features:
-                  </h4>
-                  <div className="flex flex-wrap gap-1">
-                    {service.features.slice(0, 4).map((feature, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {feature}
-                      </Badge>
-                    ))}
-                    {service.features.length > 4 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{service.features.length - 4} more
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-
-                <WhatsAppButton
-                  subject={`Service Inquiry: ${service.name}`}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
-                >
-                  Chat on WhatsApp
-                </WhatsAppButton>
-              </MagicCard>
-            ))}
+                  <WhatsAppButton
+                    subject={`Service Inquiry: ${service.name}`}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    Chat on WhatsApp
+                  </WhatsAppButton>
+                </MagicCard>
+              );
+            })}
           </div>
 
-          {filteredServices.length === 0 && (
+          {error && (
+            <p role="alert" className="py-16 text-center text-red-700">
+              {error}
+            </p>
+          )}
+          {!error && filteredServices.length === 0 && (
             <div className="text-center py-16">
               <p className="text-gray-500 text-lg">
                 No services found matching your criteria.

@@ -65,7 +65,7 @@ export async function GET(req) {
 
     const totalUsers = await User.countDocuments(query);
     const users = await User.find(query)
-      .select("-password") // Exclude password field
+      .select("-passwordHash")
       .sort(sortOptions)
       .skip((page - 1) * limit)
       .limit(limit);
@@ -101,15 +101,39 @@ export async function POST(req) {
     const body = await req.json();
 
     // Basic validation
-    if (!body.name || !body.email) {
+    if (
+      !body ||
+      typeof body !== "object" ||
+      Array.isArray(body) ||
+      typeof body.name !== "string" ||
+      !body.name.trim() ||
+      typeof body.email !== "string" ||
+      !body.email.trim()
+    ) {
       return NextResponse.json(
         { message: "Name and email are required" },
         { status: 400 }
       );
     }
+    if (body.role === "admin") {
+      return NextResponse.json(
+        { message: "Administrator accounts must be provisioned locally" },
+        { status: 403 }
+      );
+    }
+    if (body.role !== undefined && !["client", "editor"].includes(body.role)) {
+      return NextResponse.json({ message: "Invalid user role" }, { status: 400 });
+    }
+    if (
+      body.isActive !== undefined &&
+      typeof body.isActive !== "boolean"
+    ) {
+      return NextResponse.json({ message: "isActive must be a boolean" }, { status: 400 });
+    }
+    const email = body.email.trim().toLowerCase();
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email: body.email });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
         { message: "User with this email already exists" },
@@ -119,7 +143,7 @@ export async function POST(req) {
 
     const newUser = await User.create({
       name: body.name,
-      email: body.email,
+      email,
       phone: body.phone || "",
       role: body.role || "client",
       isActive: body.isActive !== undefined ? body.isActive : true,

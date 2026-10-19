@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import {
@@ -65,6 +65,7 @@ export default function AdminUsersPage() {
   const { data: session, status } = useSession();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
@@ -88,23 +89,7 @@ export default function AdminUsersPage() {
     { value: "inactive", label: "Inactive", color: "bg-red-100 text-red-800" },
   ];
 
-  useEffect(() => {
-    if (status === "authenticated" && session?.user?.role === "admin") {
-      fetchUsers();
-    }
-  }, [
-    session,
-    status,
-    searchTerm,
-    selectedRole,
-    selectedStatus,
-    sortBy,
-    sortOrder,
-    currentPage,
-  ]);
-
-  const fetchUsers = async () => {
-    setLoading(true);
+  const fetchUsers = useCallback(async () => {
     try {
       const params = new URLSearchParams({
         page: currentPage.toString(),
@@ -117,130 +102,83 @@ export default function AdminUsersPage() {
         sortOrder,
       });
 
-      const response = await fetch(`/api/users?${params}`);
+      const response = await fetch(`/api/users?${params}`, { cache: "no-store" });
       const data = await response.json();
 
       if (response.ok) {
+        setFetchError("");
         setUsers(data.users || []);
         setTotalPages(Math.ceil((data.totalUsers || 0) / 10));
       } else {
-        toast.error("Failed to fetch users");
-        // Fallback to mock data
-        setUsers(getMockUsers());
+        setFetchError(data.message || "Failed to fetch users.");
+        setUsers([]);
         setTotalPages(1);
       }
     } catch (error) {
       console.error("Error fetching users:", error);
-      toast.error("Error fetching users");
-      // Fallback to mock data
-      setUsers(getMockUsers());
+      setFetchError("Users could not be loaded.");
+      setUsers([]);
       setTotalPages(1);
     } finally {
       setLoading(false);
     }
-  };
+  }, [
+    currentPage,
+    searchTerm,
+    selectedRole,
+    selectedStatus,
+    sortBy,
+    sortOrder,
+  ]);
 
-  const getMockUsers = () => [
-    {
-      _id: "1",
-      name: "John Doe",
-      email: "john@example.com",
-      phone: "+1234567890",
-      role: "client",
-      avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-      isActive: true,
-      lastLogin: "2024-01-25T10:30:00Z",
-      createdAt: "2024-01-15T08:00:00Z",
-      updatedAt: "2024-01-25T10:30:00Z",
-      preferences: {
-        notifications: {
-          email: true,
-          sms: false,
-        },
-        theme: "light",
-      },
-    },
-    {
-      _id: "2",
-      name: "Sarah Johnson",
-      email: "sarah@university.edu",
-      phone: "+1234567891",
-      role: "client",
-      avatar:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face",
-      isActive: true,
-      lastLogin: "2024-01-24T14:20:00Z",
-      createdAt: "2024-01-10T09:15:00Z",
-      updatedAt: "2024-01-24T14:20:00Z",
-      preferences: {
-        notifications: {
-          email: true,
-          sms: true,
-        },
-        theme: "dark",
-      },
-    },
-    {
-      _id: "3",
-      name: "Mike Chen",
-      email: "mike@startup.com",
-      phone: "+1234567892",
-      role: "editor",
-      avatar:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-      isActive: true,
-      lastLogin: "2024-01-23T11:45:00Z",
-      createdAt: "2024-01-05T12:30:00Z",
-      updatedAt: "2024-01-23T11:45:00Z",
-      preferences: {
-        notifications: {
-          email: true,
-          sms: false,
-        },
-        theme: "system",
-      },
-    },
-    {
-      _id: "4",
-      name: "Admin User",
-      email: "admin@geeinnovixus.com",
-      phone: "+1234567893",
-      role: "admin",
-      avatar:
-        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face",
-      isActive: true,
-      lastLogin: "2024-01-25T15:20:00Z",
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-25T15:20:00Z",
-      preferences: {
-        notifications: {
-          email: true,
-          sms: true,
-        },
-        theme: "dark",
-      },
-    },
-    {
-      _id: "5",
-      name: "Emily Rodriguez",
-      email: "emily@company.com",
-      phone: "+1234567894",
-      role: "client",
-      avatar: null,
-      isActive: false,
-      lastLogin: "2024-01-20T16:10:00Z",
-      createdAt: "2024-01-12T14:45:00Z",
-      updatedAt: "2024-01-20T16:10:00Z",
-      preferences: {
-        notifications: {
-          email: false,
-          sms: false,
-        },
-        theme: "light",
-      },
-    },
-  ];
+  useEffect(() => {
+    if (status !== "authenticated" || session?.user?.role !== "admin") return;
+    const controller = new AbortController();
+    const params = new URLSearchParams({
+      page: currentPage.toString(),
+      limit: "10",
+      ...(searchTerm && { search: searchTerm }),
+      ...(selectedRole !== "all" && { role: selectedRole }),
+      ...(selectedStatus !== "all" && { status: selectedStatus }),
+      sortBy,
+      sortOrder,
+    });
+    fetch(`/api/users?${params}`, {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Failed to fetch users.");
+        return data;
+      })
+      .then((data) => {
+        if (controller.signal.aborted) return;
+        setFetchError("");
+        setUsers(data.users || []);
+        setTotalPages(Math.ceil((data.totalUsers || 0) / 10));
+      })
+      .catch((error) => {
+        if (controller.signal.aborted) return;
+        console.error("Error fetching users:", error);
+        setFetchError("Users could not be loaded.");
+        setUsers([]);
+        setTotalPages(1);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [
+    currentPage,
+    searchTerm,
+    selectedRole,
+    selectedStatus,
+    session?.user?.role,
+    sortBy,
+    sortOrder,
+    status,
+  ]);
 
   const handleRoleUpdate = async (userId, newRole) => {
     try {
@@ -399,6 +337,11 @@ export default function AdminUsersPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {fetchError && (
+          <p role="alert" className="mb-6 rounded-lg border border-red-200 bg-red-50 p-3 text-red-800">
+            {fetchError}
+          </p>
+        )}
         {/* Filters */}
         <Card className="mb-6">
           <CardContent className="p-6">
@@ -620,38 +563,42 @@ export default function AdminUsersPage() {
                             <Eye className="h-4 w-4" />
                           </Link>
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedUser(user);
-                            setNewRole(user.role);
-                            setShowRoleModal(true);
-                          }}
-                          title="Change Role"
-                        >
-                          <Shield className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() =>
-                            handleStatusToggle(user._id, user.isActive)
-                          }
-                          className={
-                            user.isActive
-                              ? "text-red-600 hover:text-red-900"
-                              : "text-green-600 hover:text-green-900"
-                          }
-                          title={user.isActive ? "Deactivate" : "Activate"}
-                        >
-                          {user.isActive ? (
-                            <XCircle className="h-4 w-4" />
-                          ) : (
-                            <CheckCircle className="h-4 w-4" />
-                          )}
-                        </Button>
-                        {user._id !== session.user.id && (
+                        {user.role !== "admin" && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setNewRole(user.role);
+                                setShowRoleModal(true);
+                              }}
+                              title="Change Role"
+                            >
+                              <Shield className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                handleStatusToggle(user._id, user.isActive)
+                              }
+                              className={
+                                user.isActive
+                                  ? "text-red-600 hover:text-red-900"
+                                  : "text-green-600 hover:text-green-900"
+                              }
+                              title={user.isActive ? "Deactivate" : "Activate"}
+                            >
+                              {user.isActive ? (
+                                <XCircle className="h-4 w-4" />
+                              ) : (
+                                <CheckCircle className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </>
+                        )}
+                        {user.role !== "admin" && user._id !== session.user.id && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -739,7 +686,7 @@ export default function AdminUsersPage() {
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
               <SelectContent>
-                {roles.map((role) => (
+                {roles.filter((role) => role.value !== "admin").map((role) => (
                   <SelectItem key={role.value} value={role.value}>
                     {role.label}
                   </SelectItem>

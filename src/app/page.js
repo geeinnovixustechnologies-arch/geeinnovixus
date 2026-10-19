@@ -8,11 +8,6 @@ import {
   Star,
   Users,
   Award,
-  Globe,
-  Code,
-  Database,
-  Brain,
-  Shield,
   Zap,
   Target,
 } from "lucide-react";
@@ -26,10 +21,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export default function HomePage() {
-  const [projects, setProjects] = useState([]);
   const [services, setServices] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [contentError, setContentError] = useState(false);
 
   // Counter hooks for animated statistics
   const projectsCount = useCounter(500, 0, 2000);
@@ -41,26 +36,24 @@ export default function HomePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [projectsRes, servicesRes, testimonialsRes] = await Promise.all([
-          fetch("/api/projects?limit=4"),
-          fetch("/api/services?limit=4"),
-          fetch("/api/testimonials?limit=3"),
+        const [servicesRes, testimonialsRes] = await Promise.all([
+          fetch("/api/services?limit=4", { cache: "no-store" }),
+          fetch("/api/testimonials?limit=3", { cache: "no-store" }),
+        ]);
+        if (![servicesRes, testimonialsRes].every((res) => res.ok)) {
+          throw new Error("Homepage content could not be loaded.");
+        }
+
+        const [servicesData, testimonialsData] = await Promise.all([
+          servicesRes.json(),
+          testimonialsRes.json(),
         ]);
 
-        const [projectsData, servicesData, testimonialsData] =
-          await Promise.all([
-            projectsRes.json(),
-            servicesRes.json(),
-            testimonialsRes.json(),
-          ]);
-
-        setProjects(projectsData.projects || []);
         setServices(servicesData.services || []);
         setTestimonials(testimonialsData.testimonials || []);
       } catch (error) {
         console.error("Error fetching data:", error);
-        // Fallback to mock data
-        setProjects([]);
+        setContentError(true);
         setServices([]);
         setTestimonials([]);
       } finally {
@@ -70,93 +63,6 @@ export default function HomePage() {
 
     fetchData();
   }, []);
-
-  // Fallback services data
-  const fallbackServices = [
-    {
-      icon: Brain,
-      title: "AI & Machine Learning",
-      description:
-        "Cutting-edge AI solutions, machine learning models, and intelligent automation systems.",
-      features: [
-        "Deep Learning",
-        "Computer Vision",
-        "NLP",
-        "Predictive Analytics",
-      ],
-      color: "from-purple-500 to-pink-500",
-    },
-    {
-      icon: Database,
-      title: "Blockchain Development",
-      description:
-        "Secure blockchain applications, smart contracts, and decentralized solutions.",
-      features: ["Smart Contracts", "DeFi", "NFTs", "Web3"],
-      color: "from-blue-500 to-cyan-500",
-    },
-    {
-      icon: Code,
-      title: "Web Development",
-      description:
-        "Modern, responsive web applications with cutting-edge technologies.",
-      features: [
-        "React/Next.js",
-        "Full Stack",
-        "API Development",
-        "Cloud Integration",
-      ],
-      color: "from-green-500 to-emerald-500",
-    },
-    {
-      icon: Globe,
-      title: "Research Publication",
-      description:
-        "Academic research papers, journal publications, and scholarly writing services.",
-      features: [
-        "Journal Papers",
-        "Conference Papers",
-        "Thesis Writing",
-        "Research Support",
-      ],
-      color: "from-orange-500 to-red-500",
-    },
-  ];
-
-  // Fallback testimonials data (India)
-  const fallbackTestimonials = [
-    {
-      name: "Murali Krishna",
-      title: "M.Tech Student",
-      company: "JNTU Hyderabad",
-      rating: 5,
-      review:
-        "GEE INNOVIXUS guided me end-to-end for my AI thesis and publication. The support was timely and the outcomes were excellent.",
-      project: "AI-Powered Medical Diagnosis System",
-    },
-    {
-      name: "Govardhan Reddy",
-      title: "Software Engineer",
-      company: "Hyderabad",
-      rating: 5,
-      review:
-        "Their blockchain implementation for my academic project was robust and well-documented. Delivery was on schedule.",
-      project: "Decentralized Voting System",
-    },
-    {
-      name: "Revanth Kumar",
-      title: "Research Scholar",
-      company: "Osmania University",
-      rating: 5,
-      review:
-        "The team built a clean and scalable web platform for our research visualization. Great experience overall.",
-      project: "Data Visualization Platform",
-    },
-  ];
-
-  // Use real data or fallback
-  const displayServices = services.length > 0 ? services : fallbackServices;
-  const displayTestimonials =
-    testimonials.length > 0 ? testimonials : fallbackTestimonials;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -277,7 +183,7 @@ export default function HomePage() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {displayServices.map((service, index) => (
+            {services.map((service, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -288,14 +194,16 @@ export default function HomePage() {
                 <Card className="h-full hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                   <CardContent className="p-6">
                     <div
-                      className={`inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r ${service.color} rounded-lg mb-4`}
+                      className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg mb-4"
                     >
-                      <service.icon className="h-6 w-6 text-white" />
+                      <Zap className="h-6 w-6 text-white" />
                     </div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                      {service.title}
+                      {service.name}
                     </h3>
-                    <p className="text-gray-600 mb-4">{service.description}</p>
+                    <p className="text-gray-600 mb-4">
+                      {service.shortDescription || service.description}
+                    </p>
                     <ul className="space-y-2">
                       {service.features.map((feature, featureIndex) => (
                         <li
@@ -312,6 +220,21 @@ export default function HomePage() {
               </motion.div>
             ))}
           </div>
+          {!loading && contentError && (
+            <p role="alert" className="mt-6 text-center text-red-700">
+              Website content could not be loaded. Please try again later.
+            </p>
+          )}
+          {loading && (
+            <p role="status" className="mt-6 text-center text-gray-600">
+              Loading services…
+            </p>
+          )}
+          {!loading && !contentError && services.length === 0 && (
+            <p className="mt-6 text-center text-gray-600">
+              No services are currently available.
+            </p>
+          )}
         </div>
       </section>
 
@@ -335,7 +258,7 @@ export default function HomePage() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {displayTestimonials.map((testimonial, index) => (
+            {testimonials.map((testimonial, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -345,7 +268,7 @@ export default function HomePage() {
                 className="bg-gray-50 rounded-xl p-6"
               >
                 <div className="flex items-center mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
+                  {[...Array(Math.min(5, testimonial.rating || 0))].map((_, i) => (
                     <Star
                       key={i}
                       className="h-5 w-5 text-yellow-400 fill-current"
@@ -357,21 +280,31 @@ export default function HomePage() {
                 </p>
                 <div className="border-t pt-4">
                   <div className="font-semibold text-gray-900">
-                    {testimonial.name}
+                    {testimonial.clientName}
                   </div>
                   <div className="text-sm text-gray-600">
-                    {testimonial.title}
+                    {testimonial.clientTitle}
                   </div>
                   <div className="text-sm text-gray-500">
-                    {testimonial.company}
+                    {testimonial.clientCompany}
                   </div>
                   <div className="text-xs text-blue-600 mt-1">
-                    {testimonial.project}
+                    {testimonial.projectTitle}
                   </div>
                 </div>
               </motion.div>
             ))}
           </div>
+          {!loading && !contentError && testimonials.length === 0 && (
+            <p className="mt-6 text-center text-gray-600">
+              No testimonials are currently available.
+            </p>
+          )}
+          {loading && (
+            <p role="status" className="mt-6 text-center text-gray-600">
+              Loading testimonials…
+            </p>
+          )}
         </div>
       </section>
 
